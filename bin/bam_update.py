@@ -1,5 +1,5 @@
 #! /usr/local/bin/python2.7
-# Copyright (C) 2014 Limei Chiang <dytk2134 [at] gmail [dot] com>
+# Copyright (C) 2016 Limei Chiang <dytk2134 [at] gmail [dot] com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
