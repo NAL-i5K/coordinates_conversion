@@ -76,41 +76,55 @@ class BedUpdater(object):
         removed_count = 0
         updated_file_f = open(updated_file, 'wb')
         removed_file_f = open(removed_file, 'wb')
-        current_line_num = 0
+        
         with open(self.Bed_file, 'rb') as in_f:
             for line in in_f:
-                if current_line_num ==0:
-                    removed_file_f.write(line)
-                    updated_file_f.write(line)
-                    current_line_num +=1
-                    continue
-
                 line_strip = line.strip()
                 tokens = line_strip.split('\t')
+                try:
+                    int(tokens[1])
+                    int(tokens[2])
+                except:
+                    removed_file_f.write(line)
+                    updated_file_f.write(line)
+                    continue
+
+                    
                 if tokens[0] in self.alignment_dict:
                     start, end = int(tokens[1]), int(tokens[2])
                     mappings = self.alignment_dict[tokens[0]]
                     start_mapping = filter(lambda m: m[1] <= start and start <= m[2], mappings)
                     end_mapping = filter(lambda m: m[1] <= end and end <= m[2], mappings)
-                    
-                    thickStart, thickEnd = int(tokens[6]), int(tokens[7])
-                    thickStart_mapping = filter(lambda m: m[1] <= thickStart and thickStart <= m[2], mappings)
-                    thickEnd_mapping = filter(lambda m: m[1] <= thickEnd and thickEnd <= m[2], mappings)
-                    if len(start_mapping) != 1 or len(end_mapping) != 1:
-                        removed_count+=1
-                        removed_file_f.write(line)
-                    elif len(thickStart_mapping) != 1 or len(thickEnd_mapping) != 1:
-                        removed_count+=1
-                        removed_file_f.write(line)
-                    else:
-                        tokens[0] = mappings[0][3]
-                        tokens[1] = str(start - start_mapping[0][1] + start_mapping[0][4])
-                        tokens[2] = str(end - end_mapping[0][1] + end_mapping[0][4])
-                        tokens[6] = str(thickStart - thickStart_mapping[0][1] + thickStart_mapping[0][4])
-                        tokens[7] = str(thickEnd - thickEnd_mapping[0][1] + thickEnd_mapping[0][4])
-                        keep = '\t'.join(tokens)
-                        updated_count +=1
-                        updated_file_f.write(keep+"\n")
+                    try:                    
+                        thickStart, thickEnd = int(tokens[6]), int(tokens[7])
+                        thickStart_mapping = filter(lambda m: m[1] <= thickStart and thickStart <= m[2], mappings)
+                        thickEnd_mapping = filter(lambda m: m[1] <= thickEnd and thickEnd <= m[2], mappings)
+                        if len(start_mapping) != 1 or len(end_mapping) != 1:
+                            removed_count+=1
+                            removed_file_f.write(line)
+                        elif len(thickStart_mapping) != 1 or len(thickEnd_mapping) != 1:
+                            removed_count+=1
+                            removed_file_f.write(line)
+                        else:
+                            tokens[0] = mappings[0][3]
+                            tokens[1] = str(start - start_mapping[0][1] + start_mapping[0][4])
+                            tokens[2] = str(end - end_mapping[0][1] + end_mapping[0][4])
+                            tokens[6] = str(thickStart - thickStart_mapping[0][1] + thickStart_mapping[0][4])
+                            tokens[7] = str(thickEnd - thickEnd_mapping[0][1] + thickEnd_mapping[0][4])
+                            keep = '\t'.join(tokens)
+                            updated_count +=1
+                            updated_file_f.write(keep+"\n")
+                    except:
+                        if len(start_mapping) != 1 or len(end_mapping) != 1:
+                            removed_count+=1
+                            removed_file_f.write(line)
+                        else:
+                            tokens[0] = mappings[0][3]
+                            tokens[1] = str(start - start_mapping[0][1] + start_mapping[0][4])
+                            tokens[2] = str(end - end_mapping[0][1] + end_mapping[0][4])
+                            keep = '\t'.join(tokens)
+                            updated_count +=1
+                            updated_file_f.write(keep+"\n")
           
                 else:
                     removed_count+=1
