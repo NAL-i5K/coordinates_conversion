@@ -12,9 +12,9 @@ Script for convert coordinates and IDs in different format files.
 
 ## Quick start
 * fasta_diff.py
-Compares two very similar FASTA files and outputs coordinate mappings using a multi stage algorithm:
-Stage 1: Find 100% matches
-Stage 2: Find 100% substrings, where the full length of a new sequence can be found as a substring of a old sequence
-Stage 3: Find cases where part of the sequence was converted into Ns
+Compares two very similar FASTA files and outputs coordinate mappings using a multi stage algorithm:  
+Stage 1: Find 100% matches  
+Stage 2: Find 100% substrings, where the full length of a new sequence can be found as a substring of a old sequence  
+Stage 3: Find cases where part of the sequence was converted into Ns  
 
-<code>fasta_diff.py old.fa new.fa > match.tsv</code>
+    <code>fasta_diff.py old.fa new.fa > match.tsv</code>
