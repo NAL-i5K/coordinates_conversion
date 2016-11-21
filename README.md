@@ -11,8 +11,8 @@ Script for convert coordinates and IDs in different format files.
 * bed_update.py
 
 ## Quick start
-# Preparation
-1. Get the outputs from fasta_diff.py  
+### Preparation  
+1. Get the outputs from fasta_diff.py    
 * fasta_diff.py  
 Compares two very similar FASTA files and outputs coordinate mappings using a multi stage algorithm:  
 Stage 1: Find 100% matches  
@@ -28,4 +28,4 @@ Outputs(match.tsv) the 6 columns as tab-separated values: old_id, old_start, old
         <code>pip install pysam</code>
     - [samtools] (http://samtools.sourceforge.net/)
     
-# coordinates and IDs convertion
+### coordinates and IDs convertion
