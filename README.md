@@ -31,17 +31,17 @@ Outputs(match.tsv) the 6 columns as tab-separated values: old_id, old_start, old
     - [samtools] (http://samtools.sourceforge.net/)
     
 ### coordinates and IDs convertion
-* update_gff.py
-    <code> update_gff.py –a match.tsv a.gff b.gff c.gff </code>
+* update_gff.py  
+    <code> update_gff.py –a match.tsv a.gff b.gff c.gff </code>  
 
-* bam_update.py
+* bam_update.py  
     *If you have a bam file without a corresponding index, you can generate one using:*  
-    <code> samtools index aln.bam </code>
-    *Then using bam_update.py to convert your bam files*  
-    <code> bam_update.py –a match.tsv a.bam b.bam c.bam </code>
+    <code> samtools index aln.bam </code>  
+    *Then using bam_update.py to convert your bam files*    
+    <code> bam_update.py –a match.tsv a.bam b.bam c.bam </code>  
     
-* bed_update.py
-    <code> bed_update.py –a match.tsv a.bed b.bed c.bed </code>
+* bed_update.py  
+    <code> bed_update.py –a match.tsv a.bed b.bed c.bed </code>  
 
-* bedgraph_update.py
-    <code> bed_update.py –a match.tsv a.bedgraph b.bedgraph c.bedgraph </code>
+* bedgraph_update.py  
+    <code> bed_update.py –a match.tsv a.bedgraph b.bedgraph c.bedgraph </code>  
