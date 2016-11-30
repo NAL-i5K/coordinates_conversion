@@ -4,7 +4,7 @@ Conversion programs that use the output from fasta_diff.py to convert coordinate
 ## bin/
 Script for convert coordinates and IDs in different format files.
 * bedgraph_update.py
-     - [wiki page] (https://github.com/NAL-i5K/coordinates_conversion/wiki/updage-bedgraph)
+     - [wiki page] (https://github.com/NAL-i5K/coordinates_conversion/wiki/update-bedgraph)
 * fasta_diff.py
     - [wiki page] (https://github.com/NAL-i5K/coordinates_conversion/wiki/fasta_diff.py)
 * update_gff.py
