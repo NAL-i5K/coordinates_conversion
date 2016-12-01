@@ -166,7 +166,10 @@ class BamUpdater(object):
                                         break
                                 in_for_end.close()
                                 if next_end == 0:
-                                    logging.warning(' Next alignment not find, Query id: %s will be removed',read.query_name) 
+                                    #logging.warning(' Next alignment not find, Query id: %s will be removed',read.query_name) 
+                                    removed_count+=1
+                                    removed_file_f.write(read)
+                                    continue
                                 
                                 if read.next_reference_name == read.reference_name:
                                     start_next = int(read.next_reference_start)
@@ -193,8 +196,16 @@ class BamUpdater(object):
                                     else:
                                         read_out.next_reference_start = int(start_next - start_mapping_next[0][1] + start_mapping_next[0][4])
                             else:
-                                read_out.next_reference_id = read.next_reference_id
-                                read_out.next_reference_start = read.next_reference_start
+                                in_for_end = pysam.AlignmentFile(self.bam_file, 'rb')
+                                check_next=in_for_end.count(read.next_reference_name,read.next_reference_start,read.next_reference_start+1) 
+                                in_for_end.close()
+                                if check_next!=0:                                                            
+                                    read_out.next_reference_id = read.next_reference_id
+                                    read_out.next_reference_start = read.next_reference_start
+                                else:
+                                    removed_count+=1
+                                    removed_file_f.write(read)
+                                    continue
                         elif read.next_reference_id == -1:
                             read_out.next_reference_id = read.next_reference_id
                             read_out.next_reference_start = read.next_reference_start
