@@ -223,8 +223,13 @@ class BamUpdater(object):
                                 CC_tag = tag_old[1]
                                 if tag_old[1] != "=":
                                     mappings_tag = self.alignment_dict[tag_old[1]]
-                                    new_tag.append((tag_old[0],mappings_tag[0][3]))
-                                    CP_reference_name = mappings_tag[0][3]
+                                    if len(mappings_tag)!=0:
+                                        new_tag.append((tag_old[0],mappings_tag[0][3]))
+                                        CP_reference_name = mappings_tag[0][3]
+                                    else:
+                                        removed_count+=1
+                                        removed_file_f.write(read)
+                                        break
                                 else:
                                     mappings_tag = self.alignment_dict[read.reference_name]
                                     new_tag.append((tag_old[0],tag_old[1]))
@@ -253,7 +258,7 @@ class BamUpdater(object):
                                         logging.warning('%s, CP tag reference alignment not find! This alignment will be removed.',read.query_name)
                                         removed_count+=1
                                         removed_file_f.write(read)
-                                        continue  
+                                        break  
                                  
                                     if CC_tag == "=":
                                         start_mapping_cp = filter(lambda m: m[1] <= tag_old[1] and tag_old[1] <= m[2], mappings)
@@ -266,7 +271,7 @@ class BamUpdater(object):
                                         #logging.info('%s, next hit be removed!!!',read.query_name)
                                         removed_count+=1
                                         removed_file_f.write(read)
-                                        continue
+                                        break
                                     else:
                                         CP_start = int(tag_old[1] - start_mapping_cp[0][1] + start_mapping_cp[0][4])
                                         new_tag.append((tag_old[0],CP_start))
