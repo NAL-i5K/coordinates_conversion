@@ -24,7 +24,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(levelname)-8s %(message)s')
 class BamUpdater(object):
 
     def __init__(self, alignment_list_tsv_file, updated_postfix, removed_postfix):
-        self.alignment_list = BamUpdater.read_alignment_list_tsv(alignment_list_tsv_file)	
+        self.alignment_list = BamUpdater.read_alignment_list_tsv(alignment_list_tsv_file)
         # create a dictionary to lookup alignments using old_id as key
         self.alignment_dict = defaultdict(list)
         for a in self.alignment_list:
@@ -32,7 +32,7 @@ class BamUpdater(object):
         self.updated_postfix = updated_postfix
         self.removed_postfix = removed_postfix
 
-		
+
     def update(self, bam_file):
         """
         Updates the bam_file using the alignment_list_tsv_file
@@ -40,8 +40,9 @@ class BamUpdater(object):
         """
         logging.info('  Processing bam file: %s...', bam_file)
         self.bam_file = bam_file
-        self._update_features()	
-		
+        self._update_features()
+
+
     @staticmethod
     def read_alignment_list_tsv(alignment_list_tsv_file):
         """
@@ -66,7 +67,7 @@ class BamUpdater(object):
             logging.info('  Reading alignment data from: %s...', alignment_list_tsv_file_f.name)
         logging.info('  Alignments: %d', len(alignment_list))
 
-        return alignment_list	
+        return alignment_list
 
     def _update_features(self):
         """
@@ -79,11 +80,13 @@ class BamUpdater(object):
         removed_file = bam_root + self.removed_postfix + bam_ext
         updated_count = 0
         removed_count = 0
-	Program_ID = ""
-        Program_list = ["TopHat","STAR","Bowtie","BWA"]	
-	in_f = pysam.AlignmentFile(self.bam_file, 'rb')
+        Program_ID = ""
+        Program_list = ["TopHat","STAR","Bowtie","BWA"]
+        in_f = pysam.AlignmentFile(self.bam_file, 'rb')
         bam_header_old = in_f.header
         bam_header_new = {}
+        header_new_ID_dict = {}
+        header_num_count = 0
         logging.info('  Update tag SN and LN....')
         for k,v in bam_header_old.iteritems():
             if k == 'SQ':
@@ -91,11 +94,13 @@ class BamUpdater(object):
                 for reference_sequence_dict in v:
                     if 'SN' in reference_sequence_dict:
                         if reference_sequence_dict['SN'] in self.alignment_dict:
+                            header_new_ID_dict[reference_sequence_dict['SN']] = header_num_count
                             mappings = self.alignment_dict[reference_sequence_dict['SN']]
                             reference_sequence_dict['SN'] = mappings[0][3]
                             if 'LN' in reference_sequence_dict:                               
                                 reference_sequence_dict['LN'] = mappings[len(mappings)-1][5] - mappings[0][4]
                             bam_header_new[k].append(reference_sequence_dict)
+                            header_num_count += 1
             elif k =='PG':
                 bam_header_new[k] = v
                 if v[0]['ID'] in Program_list:
@@ -116,17 +121,17 @@ class BamUpdater(object):
 
         
 
-	updated_file_f = pysam.AlignmentFile(updated_file,'wb',header = bam_header_new)
-	removed_file_f = pysam.AlignmentFile(removed_file,'wb',header = in_f.header)
+        updated_file_f = pysam.AlignmentFile(updated_file,'wb',header = bam_header_new)
+        removed_file_f = pysam.AlignmentFile(removed_file,'wb',header = in_f.header)
         bam_update_list = []
      
-	for read in in_f.fetch(until_eof=True):
+        for read in in_f.fetch(until_eof=True):
+            #If a alignment doesn't have reference name, it will directly add to updated bam file.
             if read.reference_id == -1:
                 updated_count+=1
                 updated_file_f.write(read)
-            else:		    
+            else:    
                 if read.reference_name in self.alignment_dict:
-				
                     start, end = int(read.reference_start), int(read.reference_end) # positive 0-based integer coordinates
                     mappings = self.alignment_dict[read.reference_name]
                     start_mapping = filter(lambda m: m[1] <= start and start <= m[2], mappings)
@@ -134,12 +139,12 @@ class BamUpdater(object):
                         # we got a bad annotation if start or end pos is N
                     if len(start_mapping) != 1 or len(end_mapping) != 1:
                         removed_count+=1
-	                removed_file_f.write(read)
+                        removed_file_f.write(read)
                     else:
                         read_out = pysam.AlignedSegment()
                         read_out.query_name = read.query_name
                         read_out.flag = read.flag
-                        read_out.reference_id = read.reference_id
+                        read_out.reference_id = header_new_ID_dict[read.reference_name]
                         read_out.reference_start = int(start - start_mapping[0][1] + start_mapping[0][4])
                         read_out.mapping_quality = read.mapping_quality
                         read_out.cigar = read.cigar
@@ -182,8 +187,8 @@ class BamUpdater(object):
                                         continue
                                     else:
                                         read_out.next_reference_start = int(start_next - start_mapping_next[0][1] + start_mapping_next[0][4])
-                                else:
-                                    read_out.next_reference_id = read.next_reference_id                                    
+                                        read_out.next_reference_id = header_new_ID_dict[read.next_reference_name]
+                                else:                                
                                     mappings_next = self.alignment_dict[read.next_reference_name]
                                     start_next = int(read.next_reference_start)
                                     end_next = int(next_end)
@@ -195,12 +200,13 @@ class BamUpdater(object):
                                         continue
                                     else:
                                         read_out.next_reference_start = int(start_next - start_mapping_next[0][1] + start_mapping_next[0][4])
+                                        read_out.next_reference_id = header_new_ID_dict[read.next_reference_name]
                             else:
                                 in_for_end = pysam.AlignmentFile(self.bam_file, 'rb')
                                 check_next=in_for_end.count(read.next_reference_name,read.next_reference_start,read.next_reference_start+1) 
                                 in_for_end.close()
                                 if check_next!=0:                                                            
-                                    read_out.next_reference_id = read.next_reference_id
+                                    read_out.next_reference_id = header_new_ID_dict[read.next_reference_name]
                                     read_out.next_reference_start = read.next_reference_start
                                 else:
                                     removed_count+=1
@@ -217,7 +223,7 @@ class BamUpdater(object):
                         CC_tag = "="
                         mappings_diff = 0
                         CP_reference_name = read.reference_name
-                        
+                        tagname_notfound = 0
                         for tag_old in read.tags:   
                             if tag_old[0].startswith('CC'):
                                 CC_tag = tag_old[1]
@@ -229,6 +235,7 @@ class BamUpdater(object):
                                     else:
                                         removed_count+=1
                                         removed_file_f.write(read)
+                                        tagname_notfound = 1
                                         break
                                 else:
                                     mappings_tag = self.alignment_dict[read.reference_name]
@@ -258,6 +265,7 @@ class BamUpdater(object):
                                         logging.warning('%s, CP tag reference alignment not find! This alignment will be removed.',read.query_name)
                                         removed_count+=1
                                         removed_file_f.write(read)
+                                        tagname_notfound = 1
                                         break  
                                  
                                     if CC_tag == "=":
@@ -271,6 +279,7 @@ class BamUpdater(object):
                                         #logging.info('%s, next hit be removed!!!',read.query_name)
                                         removed_count+=1
                                         removed_file_f.write(read)
+                                        tagname_notfound = 1
                                         break
                                     else:
                                         CP_start = int(tag_old[1] - start_mapping_cp[0][1] + start_mapping_cp[0][4])
@@ -312,7 +321,8 @@ class BamUpdater(object):
                             else:
                                 new_tag.append((tag_old[0],tag_old[1]))
 
-   
+                        if tagname_notfound != 0:
+                            continue
                                 
                         read_out.tags= new_tag
 
@@ -321,6 +331,7 @@ class BamUpdater(object):
 	        else:
 		    removed_count+=1
 	            removed_file_f.write(read)
+                    
         in_f.close()
         updated_file_f.close()
         removed_file_f.close()
