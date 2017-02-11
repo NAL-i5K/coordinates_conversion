@@ -11,7 +11,7 @@ Update the sequence id and coordinates of a Bam file using an alignment file gen
 
 """
 
-__version__ = '1.1'
+__version__ = '2.0'
 
 from collections import OrderedDict
 from collections import defaultdict
@@ -108,7 +108,7 @@ class BamUpdater(object):
                     logging.info('  Program record identifier %s',Program_ID)
             else:
                 bam_header_new[k] = v
-        logging.info('  Standard meaning tag: CC:Z, CP:i will be updated...')
+        logging.info('  Only some alignment sections will be updated! Tags won\'t be updated!')
         Custom_tag = []
         if Program_ID == 'TopHat':
             Custom_tag = ['XG','XM','XN','XO','XS']
@@ -148,184 +148,31 @@ class BamUpdater(object):
                         read_out.reference_start = int(start - start_mapping[0][1] + start_mapping[0][4])
                         read_out.mapping_quality = read.mapping_quality
                         read_out.cigar = read.cigar
-                        read_out.next_reference_id = read.next_reference_id
-                        next_end = 0
-                        
-                        mappings_diff = 0
+                        read_out.template_length = read.template_length
+                        read_out.query_sequence = read.query_sequence
+                        read_out.query_qualities = read.query_qualities
+                        read_out.tags= read.tags
                         if read.next_reference_id != -1:
-                            mappings_check = self.alignment_dict[read.next_reference_name]
-                            for mappings_line in mappings_check:
-                                if mappings_line[1] != mappings_line[4] or mappings_line[2] != mappings_line[5]:
-                                    mappings_diff = 0
-                                    break
-                                elif len(mappings_check)!=1:
-                                    mappings_diff = 0
-                                    break
-                                elif mappings_line[1] == mappings_line[4] and mappings_line[2] == mappings_line[5]:
-                                    mappings_diff = 1
-                            if mappings_diff == 0:
-                                in_for_end = pysam.AlignmentFile(self.bam_file, 'rb')
-                                for next_read in in_for_end.fetch(read.next_reference_name,read.next_reference_start,read.next_reference_start+1):
-                                    if read.query_name == next_read.query_name and read.next_reference_start == next_read.reference_start:
-                                        next_end = next_read.reference_end
-                                        break
-                                in_for_end.close()
-                                if next_end == 0:
-                                    #logging.warning(' Next alignment not find, Query id: %s will be removed',read.query_name) 
+                            if read.next_reference_name in self.alignment_dict:
+                                next_mappings = self.alignment_dict[read.next_reference_name]
+                                next_start = int(read.next_reference_start)
+                                start_next_mapping = filter(lambda m: m[1] <= next_start and next_start <= m[2], next_mappings)
+                                if len(start_next_mapping)!=1:
                                     removed_count+=1
                                     removed_file_f.write(read)
                                     continue
-                                
-                                if read.next_reference_name == read.reference_name:
-                                    start_next = int(read.next_reference_start)
-                                    end_next = int(next_end)
-                                    start_mapping_next = filter(lambda m: m[1] <= start_next and start_next <= m[2], mappings)
-                                    end_mapping_next = filter(lambda m: m[1] <= end_next and end_next <= m[2], mappings)
-                                    if len(start_mapping_next)!=1 or len(end_mapping_next)!=1:
-                                        removed_count+=1
-                                        removed_file_f.write(read)
-                                        continue
-                                    else:
-                                        read_out.next_reference_start = int(start_next - start_mapping_next[0][1] + start_mapping_next[0][4])
-                                        read_out.next_reference_id = header_new_ID_dict[read.next_reference_name]
-                                else:                                
-                                    mappings_next = self.alignment_dict[read.next_reference_name]
-                                    start_next = int(read.next_reference_start)
-                                    end_next = int(next_end)
-                                    start_mapping_next = filter(lambda m: m[1] <= start_next and start_next <= m[2], mappings_next)
-                                    end_mapping_next = filter(lambda m: m[1] <= end_next and end_next <= m[2], mappings_next)
-                                    if len(start_mapping_next)!=1 or len(end_mapping_next)!=1:
-                                        removed_count+=1
-                                        removed_file_f.write(read)
-                                        continue
-                                    else:
-                                        read_out.next_reference_start = int(start_next - start_mapping_next[0][1] + start_mapping_next[0][4])
-                                        read_out.next_reference_id = header_new_ID_dict[read.next_reference_name]
-                            else:
-                                in_for_end = pysam.AlignmentFile(self.bam_file, 'rb')
-                                check_next=in_for_end.count(read.next_reference_name,read.next_reference_start,read.next_reference_start+1) 
-                                in_for_end.close()
-                                if check_next!=0:                                                            
-                                    read_out.next_reference_id = header_new_ID_dict[read.next_reference_name]
-                                    read_out.next_reference_start = read.next_reference_start
                                 else:
-                                    removed_count+=1
-                                    removed_file_f.write(read)
-                                    continue
+                                    read_out.next_reference_id = header_new_ID_dict[read.next_reference_name]
+                                    read_out.next_reference_start = int(next_start - start_next_mapping[0][1] + start_next_mapping[0][4])
+                            else:
+                                removed_count+=1
+                                removed_file_f.write(read)
+                                continue
                         elif read.next_reference_id == -1:
                             read_out.next_reference_id = read.next_reference_id
                             read_out.next_reference_start = read.next_reference_start
-                                                    
-                        read_out.template_length = read.template_length                        
-                        read_out.query_sequence = read.query_sequence
-                        read_out.query_qualities = read.query_qualities
-                        new_tag = []
-                        CC_tag = "="
-                        mappings_diff = 0
-                        CP_reference_name = read.reference_name
-                        tagname_notfound = 0
-                        for tag_old in read.tags:   
-                            if tag_old[0].startswith('CC'):
-                                CC_tag = tag_old[1]
-                                if tag_old[1] != "=":
-                                    mappings_tag = self.alignment_dict[tag_old[1]]
-                                    if len(mappings_tag)!=0:
-                                        new_tag.append((tag_old[0],mappings_tag[0][3]))
-                                        CP_reference_name = mappings_tag[0][3]
-                                    else:
-                                        removed_count+=1
-                                        removed_file_f.write(read)
-                                        tagname_notfound = 1
-                                        break
-                                else:
-                                    mappings_tag = self.alignment_dict[read.reference_name]
-                                    new_tag.append((tag_old[0],tag_old[1]))
-                                    
-                            elif tag_old[0].startswith('CP'):
-                                CP_end = 0
-                                for mappings_line in mappings_tag:
-                                    if mappings_line[1] != mappings_line[4] or mappings_line[2] != mappings_line[5]:
-                                        mappings_diff = 0
-                                        break
-                                    elif len(mappings_tag)!=1:
-                                        mappings_diff = 0
-                                        break                   
-                                    elif mappings_line[1] == mappings_line[4] and mappings_line[2] == mappings_line[5]:
-                                        mappings_diff = 1
-                                if mappings_diff ==0:
-                                    try:
-                                        in_for_CP = pysam.AlignmentFile(self.bam_file, 'rb')
-                                        for CP_read in in_for_CP(CP_reference_name,tag_old[1],tag_old[1]+1):
-                                            if tag_old[1] == CP_read.reference_start:
-                                                CP_end = CP_read.reference_end
-                                                break
-                                        in_for_CP.close()
-                                    except:
-                                        CP_end = 0
-                                        logging.warning('%s, CP tag reference alignment not find! This alignment will be removed.',read.query_name)
-                                        removed_count+=1
-                                        removed_file_f.write(read)
-                                        tagname_notfound = 1
-                                        break  
-                                 
-                                    if CC_tag == "=":
-                                        start_mapping_cp = filter(lambda m: m[1] <= tag_old[1] and tag_old[1] <= m[2], mappings)
-                                        end_mapping_cp = filter(lambda m: m[1] <= CP_end and CP_end <= m[2], mappings)
-                                    elif CC_tag != "=":
-                                        mappings_tag = self.alignment_dict[CC_tag]
-                                        start_mapping_cp = filter(lambda m: m[1] <= tag_old[1] and tag_old[1] <= m[2], mappings_tag)
-                                        end_mapping_cp = filter(lambda m: m[1] <= CP_end and CP_end <= m[2], mappings_tag)
-                                    if len(start_mapping_cp)!=1 and len(end_mapping_cp)!=1:                      
-                                        #logging.info('%s, next hit be removed!!!',read.query_name)
-                                        removed_count+=1
-                                        removed_file_f.write(read)
-                                        tagname_notfound = 1
-                                        break
-                                    else:
-                                        CP_start = int(tag_old[1] - start_mapping_cp[0][1] + start_mapping_cp[0][4])
-                                        new_tag.append((tag_old[0],CP_start))
-                               
-                                else:
-                                    new_tag.append((tag_old[0],tag_old[1]))
-        
-                            elif Program_ID == "TopHat" or Program_ID == "Bowtie":
-                                if tag_old[0] not in Custom_tag:                    
-                                    if tag_old[0].startswith('X'):
-                                        logging.warning('  New custom tag: %s detected! This tag will not be updated!',tag_old[0])
-                                        new_tag.append((tag_old[0],tag_old[1]))
-                                    else:
-                                        new_tag.append((tag_old[0],tag_old[1]))
-                                else:
-                                    new_tag.append((tag_old[0],tag_old[1]))
-                            elif Program_ID == "STAR":
-                                if tag_old[0] not in Custom_tag:
-                                    if tag_old[0].startswith('X'):
-                                        logging.warning('  New custom tag: %s detected! This tag will not be updated!',tag_old[0])
-                                        new_tag.append((tag_old[0],tag_old[1]))
-                                    else:
-                                        new_tag.append((tag_old[0],tag_old[1]))
-                                elif tag_old[0] == "JI":
-                                    logging.warning('  Detect JI tag! This tag will not be updated!')
-                                    new_tag.append((tag_old[0],tag_old[1]))
-                            elif Program_ID == "BWA":
-                                if tag_old[0] not in Custom_tag:
-                                    if tag_old[0].startswith('X'):
-                                        logging.warning('  New custom tag: %s detected! This tag will not be updated!',tag_old[0])
-                                        new_tag.append((tag_old[0],tag_old[1]))
-                                    else:
-                                        new_tag.append((tag_old[0],tag_old[1]))
-                        
-                                elif tag_old[0] == "XA":
-                                    logging.warning('  Detect XA tag! This tag will not be updated!')
-                                    new_tag.append((tag_old[0],tag_old[1]))
-                            else:
-                                new_tag.append((tag_old[0],tag_old[1]))
-
-                        if tagname_notfound != 0:
-                            continue
+                                                                 
                                 
-                        read_out.tags= new_tag
-
 	                updated_count +=1
                         updated_file_f.write(read_out)
 	        else:
