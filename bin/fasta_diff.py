@@ -188,27 +188,27 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False):
                 if header_check and not matches[0][0][0][0].split('.')[0] in new_fasta_dict[new_seq]['header']:
                     logging.warning('Failed header check (match_split_subsequence): %s -> %s', matches[0][0][0][0], matches[0][0][0][3])
                 new_matches = []
-                tmp_start = 0
-                tmp_end = 0
-                flag = 0
+                tmp_oldstart = 0
+                tmp_oldend = 0
+                tmp_newstart = 0
+                tmp_newend = 0
+
                 for match in matches[0][0]:
-                    if (match[1], match[2]) == (match[4], match[5]):
-                        if match == matches[0][0][0]:
-                            tmp_start = match[1]
-                            tmp_end = match[2]
-                        elif matches[0][1][tmp_start:match[2]] == new_seq[tmp_start:match[2]]:
-                            tmp_end = match[2]
-                        else:
-                            new_matches.append([match[0], tmp_start, tmp_end, match[3], tmp_start, tmp_end])
-                            tmp_start = match[1]
-                            tmp_end = match[2]
-                        flag = 1
+                    if match == matches[0][0][0]:
+                        tmp_oldstart = match[1]
+                        tmp_oldend = match[2]
+                        tmp_newstart = match[4]
+                        tmp_newend = match[5]
+                    elif matches[0][1][tmp_oldstart:match[2]] == new_seq[tmp_newstart:match[5]]:
+                        tmp_oldend = match[2]
+                        tmp_newend = match[5]
                     else:
-                        new_matches.append(match)
-                        tmp_start = match[1]
-                        tmp_end = match[2]
-                if len(new_matches) != len(matches) or flag == 1:
-                    new_matches.append([match[0], tmp_start, tmp_end, match[3], tmp_start, tmp_end])
+                        new_matches.append([match[0], tmp_oldstart, tmp_oldend, match[3], tmp_newstart, tmp_newend])
+                        tmp_oldstart = match[1]
+                        tmp_oldend = match[2]
+                        tmp_newstart = match[4]
+                        tmp_newend = match[5]
+                new_matches.append([match[0], tmp_oldstart, tmp_oldend, match[3], tmp_newstart, tmp_newend])
 
                 alignment_list.extend(new_matches)
                 del old_fasta_dict[matches[0][1]]
