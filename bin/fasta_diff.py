@@ -204,10 +204,13 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False):
                         tmp_newend = match[5]
                     else:
                         for nucl in matches[0][1][tmp_oldend:]:
-                            if new_seq[tmp_newend] == nucl:
-                                tmp_oldend += 1
-                                tmp_newend += 1
-                            else:
+                            try:
+                                if new_seq[tmp_newend] == nucl:
+                                    tmp_oldend += 1
+                                    tmp_newend += 1
+                                else:
+                                    break
+                            except:
                                 break
                         new_matches.append([match[0], tmp_oldstart, tmp_oldend, match[3], tmp_newstart, tmp_newend])
                         tmp_oldstart = match[1]
@@ -216,10 +219,13 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False):
                         tmp_newend = match[5]
                 #check if the new sequence end with N
                 for nucl in matches[0][1][tmp_oldend:]:
-                    if new_seq[tmp_newend] == nucl:
-                        tmp_oldend += 1
-                        tmp_newend += 1
-                    else:
+                    try:
+                        if new_seq[tmp_newend] == nucl:
+                            tmp_oldend += 1
+                            tmp_newend += 1
+                        else:
+                            break
+                    except:
                         break
 
                 new_matches.append([match[0], tmp_oldstart, tmp_oldend, match[3], tmp_newstart, tmp_newend])
