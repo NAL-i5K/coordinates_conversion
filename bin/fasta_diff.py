@@ -38,7 +38,7 @@ def fasta_file_to_dict(fasta_file, id=True, header=False, seq=False):
     entry = dict([('id', ''), ('header', ''), ('seq', '')])
     count = 0
     line_num = 0
-  
+
     for line in fasta_file_f:
         line = line.strip()
         if line[0] == '>':
@@ -64,7 +64,7 @@ def fasta_file_to_dict(fasta_file, id=True, header=False, seq=False):
         if key in fasta_dict:
             logging.warning('%s : Line %d : Duplicate %s [%s] : ID = [%s].', fasta_file_f.name, line_num, '||'.join([i for i in flags if flags[i]]), key[:25] + (key[25:] and '..'), entry['id'])
         fasta_dict[key] = entry
-      
+
     return fasta_dict, count
 
 def fasta_dict_to_file(fasta_dict, fasta_file):
@@ -75,7 +75,7 @@ def fasta_dict_to_file(fasta_dict, fasta_file):
     """
     if isinstance(fasta_file, str):
         fasta_file = open(fasta_file, 'wb')
-  
+
     for key in fasta_dict:
         fasta_file.write(fasta_dict[key]['header'] + '\n' + fasta_dict[key]['seq'] + '\n')
 
@@ -111,7 +111,7 @@ def query_yes_no(question, default='yes'):
             return valid[choice]
         else:
             sys.stderr.write('Please respond with "y" or "n".\n')
-            
+
 def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False):
     """
     Compares two very similar FASTA files and outputs coordinate mappings using a multi stage algorithm:
@@ -168,6 +168,7 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False):
         for new_seq in new_seqs:
             segments = new_seq.replace('N', ' ').split()
             matches = []
+
             for old_seq in old_seqs:
                 start_original = 0
                 start_new = 0
@@ -186,7 +187,50 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False):
             if len(matches) == 1:
                 if header_check and not matches[0][0][0][0].split('.')[0] in new_fasta_dict[new_seq]['header']:
                     logging.warning('Failed header check (match_split_subsequence): %s -> %s', matches[0][0][0][0], matches[0][0][0][3])
-                alignment_list.extend(matches[0][0])
+                new_matches = []
+                tmp_oldstart = 0
+                tmp_oldend = 0
+                tmp_newstart = 0
+                tmp_newend = 0
+
+                for match in matches[0][0]:
+                    if match == matches[0][0][0]:
+                        tmp_oldstart = match[1]
+                        tmp_oldend = match[2]
+                        tmp_newstart = match[4]
+                        tmp_newend = match[5]
+                    elif matches[0][1][tmp_oldstart:match[2]] == new_seq[tmp_newstart:match[5]]:
+                        tmp_oldend = match[2]
+                        tmp_newend = match[5]
+                    else:
+                        for nucl in matches[0][1][tmp_oldend:]:
+                            try:
+                                if new_seq[tmp_newend] == nucl:
+                                    tmp_oldend += 1
+                                    tmp_newend += 1
+                                else:
+                                    break
+                            except:
+                                break
+                        new_matches.append([match[0], tmp_oldstart, tmp_oldend, match[3], tmp_newstart, tmp_newend])
+                        tmp_oldstart = match[1]
+                        tmp_oldend = match[2]
+                        tmp_newstart = match[4]
+                        tmp_newend = match[5]
+                #check if the new sequence end with N
+                for nucl in matches[0][1][tmp_oldend:]:
+                    try:
+                        if new_seq[tmp_newend] == nucl:
+                            tmp_oldend += 1
+                            tmp_newend += 1
+                        else:
+                            break
+                    except:
+                        break
+
+                new_matches.append([match[0], tmp_oldstart, tmp_oldend, match[3], tmp_newstart, tmp_newend])
+
+                alignment_list.extend(new_matches)
                 del old_fasta_dict[matches[0][1]]
                 del new_fasta_dict[new_seq]
             elif len(matches) > 1:
