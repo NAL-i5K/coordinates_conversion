@@ -4,15 +4,15 @@ Conversion programs that use the output from fasta_diff.py to convert reference 
 ## bin/
 Scripts to convert reference sequence IDs and coordinates in different file formats.
 * fasta_diff.py
-    - [wiki page] (https://github.com/NAL-i5K/coordinates_conversion/wiki/fasta_diff.py)
+    - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/fasta_diff.py)
 * update_gff.py
-    - [wiki page] (https://github.com/NAL-i5K/coordinates_conversion/wiki/update-gff)
+    - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-gff)
 * bam_update.py
-    - [wiki page] (https://github.com/NAL-i5K/coordinates_conversion/wiki/update-bam)
+    - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-bam)
 * bed_update.py
-    - [wiki page] (https://github.com/NAL-i5K/coordinates_conversion/wiki/update-bed)
+    - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-bed)
 * bedgraph_update.py
-     - [wiki page] (https://github.com/NAL-i5K/coordinates_conversion/wiki/update-bedgraph)
+     - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-bedgraph)
 
 ## Quick start
 1. Run fasta_diff.py    
