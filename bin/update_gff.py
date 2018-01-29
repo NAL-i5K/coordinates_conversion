@@ -97,6 +97,9 @@ class GffUpdater(object):
         with open(self.gff_file, 'rb') as gff_f:
             current_line_num = 0
             for line in gff_f:
+                if len(line.strip()) == 0:
+                    # ingore blank line
+                    continue
                 if line[0] == '#':
                     self.gff_line_root_list.append(current_line_num)
                     self.gff_root_line_dict[current_line_num].append(current_line_num)
@@ -137,6 +140,9 @@ class GffUpdater(object):
         with open(self.gff_file, 'rb') as in_f:
             current_line_num = 0
             for line in in_f:
+                if len(line.strip()) == 0:
+                    # ingore blank line
+                    continue
                 if line[0] == '#':
                     line_strip = line.strip()
                     self.gff_converted_line_dict[current_line_num] = line
