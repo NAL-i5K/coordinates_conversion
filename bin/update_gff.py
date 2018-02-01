@@ -177,7 +177,8 @@ class GffUpdater(object):
                 self.gff_line_list.append(line)
                 current_line_num += 1
 
-    def _output_sequence_region(self, updated_file_f):
+    def _output_sequence_region(self):
+    #def _output_sequence_region(self, updated_file_f):
         """
         Write new "##sequence-region seqid start end" lines to updated_file_f
         :param updated_file_f: write to this file object
@@ -185,10 +186,12 @@ class GffUpdater(object):
         """
         from itertools import groupby
         from itertools import chain
+        self.sequence_regions = dict()
         for new_id, alignments in groupby(sorted(self.alignment_list, key=lambda a: a[3]), key=lambda a: a[3]):
             pos = list(chain(*[(a[4], a[5]) for a in alignments]))
             # convert from 0-based to 1-based coordinate system
-            updated_file_f.write('##sequence-region %s %d %d\n' % (new_id, min(pos) + 1, max(pos)))
+            #updated_file_f.write('##sequence-region %s %d %d\n' % (new_id, min(pos) + 1, max(pos)))
+            self.sequence_regions[new_id] = '##sequence-region %s %d %d\n' % (new_id, min(pos) + 1, max(pos))
 
     def _output_features(self):
         """
@@ -202,17 +205,23 @@ class GffUpdater(object):
         removed_file = gff_root + self.removed_postfix + gff_ext
         updated_count = 0
         removed_count = 0
-        sequence_region_written = False
+        #sequence_region_written = False
+        wrote_sequence_region = set()
+        self._output_sequence_region()
         with open(updated_file, 'wb') as updated_file_f, open(removed_file, 'wb') as removed_file_f:
             for lc, line in enumerate(self.gff_line_list):
                 if self.gff_line_status_dict[lc] == GffUpdater.KEEP:
+                    Scaffold = self.gff_converted_line_dict[lc].split("\t")[0]
+                    if Scaffold not in wrote_sequence_region:
+                        updated_file_f.write(self.sequence_regions[Scaffold])
+                        wrote_sequence_region.add(Scaffold)
                     updated_file_f.write(self.gff_converted_line_dict[lc])
                     updated_count += 1
                 elif self.gff_line_status_dict[lc] == GffUpdater.HEADER:
                     updated_file_f.write(self.gff_converted_line_dict[lc])
-                elif self.gff_line_status_dict[lc] == GffUpdater.SEQUENCE_REGION and not sequence_region_written:
-                    self._output_sequence_region(updated_file_f)
-                    sequence_region_written = True
+                #elif self.gff_line_status_dict[lc] == GffUpdater.SEQUENCE_REGION and not sequence_region_written:
+                #    self._output_sequence_region(updated_file_f)
+                #    sequence_region_written = True
                 elif self.gff_line_status_dict[lc] == GffUpdater.POSITION_REMOVED or self.gff_line_status_dict[lc] == GffUpdater.SEQUENCE_REMOVED:
                     removed_file_f.write(line)
                     removed_count += 1
