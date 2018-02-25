@@ -165,7 +165,7 @@ class VCFUpdater(object):
                 else:
                     tokens = line_strip.split('\t')
                     if tokens[0] in self.alignment_dict:
-                        start, end = int(tokens[1]), int(tokens[1]) + len(tokens[3]) # positive 1-based integer coordinates
+                        start, end = int(tokens[1]), int(tokens[1]) -1 + len(tokens[3])# positive 1-based integer coordinates
                         mappings = self.alignment_dict[tokens[0]]
                         start_mapping = filter(lambda m: m[1] < start and start <= m[2], mappings)
                         end_mapping = filter(lambda m: m[1] < end and end <= m[2], mappings)
