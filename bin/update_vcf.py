@@ -102,7 +102,7 @@ class VCFUpdater(object):
     def _update_features(self):
         """
         Goes through the VCF file, updating the ids and coordinates of each feature and
-        checks for removed ids and coordinates. 
+        checks for removed ids and coordinates.
         """
         from os.path import splitext, basename
         VCF_root, VCF_ext = splitext(self.vcf_file)
@@ -133,7 +133,7 @@ class VCFUpdater(object):
                             mappings_dict = dict()
                             for mapping in mappings:
                                 if mapping[3] not in mappings_dict:
-                                    mappings_dict[mapping[3]] = {'min': mapping[4], 'max': mapping[5]}
+                                    mappings_dict[mapping[3]] = {'min':mapping[4],'max':mapping[5],'length':mapping[5]-mapping[4]}
                                 else:
                                     mappings_dict[mapping[3]]['min'] = min(mappings_dict[mapping[3]]['min'], mapping[4])
                                     mappings_dict[mapping[3]]['max'] = max(mappings_dict[mapping[3]]['max'], mapping[5])
@@ -146,20 +146,20 @@ class VCFUpdater(object):
                                         contig_dict['length'] = str(sequence_length[newid]['length'])
                                     else:
                                         contig_dict['length'] = mappings_dict[newid]['length']
-                                updated_contig = ','.join("%s=%r" % (key,val) for (key,val) in contig_dict.iteritems())
+                                updated_contig = ','.join("%s=%s" % (key,str(val)) for (key,val) in contig_dict.iteritems())
                                 new_meta = re.sub(r'##contig=<(.+)>','##contig=<%s>' % updated_contig, meta_information)
                                 updated_file_f.write(new_meta + '\n')
                                 flag = True
                         if flag == True:
                             continue
-                            
+
                     elif meta_information.startswith('##reference'):
                         if self.reference:
                             reference_filename = basename(self.reference)
                             meta_information = re.sub(r'##reference=(.+)','##reference=' + reference_filename, meta_information)
                     updated_file_f.write(meta_information + '\n')
                     removed_file_f.write(meta_information + '\n')
-                elif line_strip.startswith == '#':
+                elif line_strip.startswith('#'):
                     updated_file_f.write(line_strip + '\n')
                     removed_file_f.write(line_strip + '\n')
                 else:
