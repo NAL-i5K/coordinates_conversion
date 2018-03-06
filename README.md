@@ -13,6 +13,8 @@ Scripts to convert reference sequence IDs and coordinates in different file form
     - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-bed)
 * bedgraph_update.py
      - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-bedgraph)
+* update_vcf.py
+     - [wiki_page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-vcf)
 
 ## Quick start
 1. Run fasta_diff.py    
@@ -56,3 +58,7 @@ Scripts to convert reference sequence IDs and coordinates in different file form
   * bedgraph_update.py  
 
     <code> bed_update.py –a match.tsv a.bedgraph b.bedgraph c.bedgraph </code>  
+    
+  * update_vcf.py  
+
+    <code> update_vcf.py –a match.tsv -ref new_assembly.fa a.vcf b.vcf c.vcf </code> 
