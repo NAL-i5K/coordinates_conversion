@@ -112,6 +112,8 @@ class VCFUpdater(object):
         removed_count = 0
         updated_file_f = open(updated_file, 'wb')
         removed_file_f = open(removed_file, 'wb')
+        contig_key = ['ID', 'length']
+        contig_sort_map = defaultdict(int, zip(contig_key, range(len(contig_key), 0, -1)))
         if self.reference:
             sequence_length = self.fasta_file_sequence_length()
         with open(self.vcf_file, 'rb') as in_f:
@@ -146,7 +148,10 @@ class VCFUpdater(object):
                                         contig_dict['length'] = str(sequence_length[newid]['length'])
                                     else:
                                         contig_dict['length'] = mappings_dict[newid]['length']
-                                updated_contig = ','.join("%s=%s" % (key,str(val)) for (key,val) in contig_dict.iteritems())
+                                contig_list = []
+                                for k, v in sorted(contig_dict.items(), key=lambda x: contig_sort_map[x[0]], reverse=True):
+                                    contig_list.append('%s=%s' % (str(k), str(v)))
+                                updated_contig = ','.join(contig_list)
                                 new_meta = re.sub(r'##contig=<(.+)>','##contig=<%s>' % updated_contig, meta_information)
                                 updated_file_f.write(new_meta + '\n')
                                 flag = True
