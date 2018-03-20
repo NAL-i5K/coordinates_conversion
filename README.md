@@ -7,11 +7,11 @@ Scripts to convert reference sequence IDs and coordinates in different file form
     - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/fasta_diff.py)
 * update_gff.py
     - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-gff)
-* bam_update.py
+* update_bam.py
     - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-bam)
-* bed_update.py
+* update_bed.py
     - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-bed)
-* bedgraph_update.py
+* update_bedgraph.py
      - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-bedgraph)
 * update_vcf.py
      - [wiki_page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-vcf)
@@ -37,7 +37,7 @@ Scripts to convert reference sequence IDs and coordinates in different file form
 
     <code> update_gff.py –a match.tsv a.gff b.gff c.gff </code>  
 
-  * bam_update.py  
+  * update_bam.py  
     * The following programs need to be installed before running this program:
       * [pysam](http://pysam.readthedocs.io/en/latest/index.html)
 
@@ -47,17 +47,17 @@ Scripts to convert reference sequence IDs and coordinates in different file form
     * If you have a bam file without a corresponding index file (.bai), you can generate one using:  
 
     <code> samtools index aln.bam </code>  
-    * Then use bam_update.py to convert your bam files
+    * Then use update_bam.py to convert your bam files
 
-    <code> bam_update.py –a match.tsv a.bam b.bam c.bam </code>  
+    <code> update_bam.py –a match.tsv a.bam b.bam c.bam </code>  
 
-  * bed_update.py  
+  * update_bed.py  
 
-    <code> bed_update.py –a match.tsv a.bed b.bed c.bed </code>  
+    <code> update_bed.py –a match.tsv a.bed b.bed c.bed </code>  
 
-  * bedgraph_update.py  
+  * update_bedgraph.py  
 
-    <code> bed_update.py –a match.tsv a.bedgraph b.bedgraph c.bedgraph </code>  
+    <code> update_bedgraph.py –a match.tsv a.bedgraph b.bedgraph c.bedgraph </code>  
     
   * update_vcf.py  
 
