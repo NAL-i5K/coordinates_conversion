@@ -144,6 +144,8 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False):
         # Find 100% substrings, where the full length of a new sequence can be found as a substring of a old sequence
         old_seqs = old_fasta_dict.keys()
         new_seqs = new_fasta_dict.keys()
+        match_truncated = dict() # {matches[0]: {'matches': {new_seq}, 'alignment': [oldid, oldstart, oldend, newid, newstart, newend]}
+        match_truncated_order = list()
         for new_seq in new_seqs:
             matches = filter(lambda old_seq: new_seq in old_seq, old_seqs)
             if len(matches) == 1:
@@ -151,11 +153,23 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False):
                 alignment = [old_fasta_dict[matches[0]]['id'], start, start + len(new_seq), new_fasta_dict[new_seq]['id'], 0, len(new_seq)]
                 if header_check and not old_fasta_dict[matches[0]]['id'].split('.')[0] in new_fasta_dict[new_seq]['header']:
                     logging.warning('Failed header check (match_truncated_sequence): %s -> %s', old_fasta_dict[matches[0]]['id'], new_fasta_dict[new_seq]['id'])
-                alignment_list.append(alignment)
-                del old_fasta_dict[matches[0]]
-                del new_fasta_dict[new_seq]
+                # need to check if this match is not a one to multiple mapping
+                if matches[0] not in match_truncated:
+                    match_truncated_order.append(matches[0])
+                    match_truncated[matches[0]] = {
+                        'matches': list(),
+                        'alignment': None
+                    }
+                match_truncated[matches[0]]['matches'].append(new_seq)
+                match_truncated[matches[0]]['alignment'] = alignment
             elif len(matches) > 1:
                 logging.warning('Failed one to one mapping: %s has %d matches: %s\n' % (new_fasta_dict[new_seq]['id'], len(matches), ','.join([old_fasta_dict[x]['id'].split('.')[0] for x in matches])))
+        for match in match_truncated_order:
+            if len(match_truncated[match]['matches']) == 1:
+                # one to one
+                alignment_list.append(match_truncated[match]['alignment'])
+                del old_fasta_dict[match] # matches[0]
+                del new_fasta_dict[match_truncated[match]['matches'][0]] # new_seq
 
     def match_split_subsequence():
         # Find cases where part of the sequence was converted into Ns
@@ -165,6 +179,8 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False):
         # 3. if found, write an alignment line for every substring
         old_seqs = old_fasta_dict.keys()
         new_seqs = new_fasta_dict.keys()
+        match_split = dict() # {matches[0]: {'matches': {new_seq}, 'alignment': [oldid, oldstart, oldend, newid, newstart, newend]}
+        match_split_order = list()
         for new_seq in new_seqs:
             segments = new_seq.replace('N', ' ').split()
             matches = []
@@ -229,12 +245,22 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False):
                         break
 
                 new_matches.append([match[0], tmp_oldstart, tmp_oldend, match[3], tmp_newstart, tmp_newend])
-
-                alignment_list.extend(new_matches)
-                del old_fasta_dict[matches[0][1]]
-                del new_fasta_dict[new_seq]
+                if matches[0][1] not in match_split:
+                    match_split_order.append(matches[0][1])
+                    match_split[matches[0][1]] = {
+                        'matches': list(),
+                        'alignment': None
+                    }
+                match_split[matches[0][1]]['matches'].append(new_seq)
+                match_split[matches[0][1]]['alignment'] = new_matches
             elif len(matches) > 1:
                 logging.warning('Failed one to one mapping: %s has %d matches: %s\n' % (new_fasta_dict[new_seq]['id'], len(matches), ','.join([x[0][0][0].split('.')[0] for x in matches])))
+        for match in match_split_order:
+            if len(match_split[match]['matches']) == 1:
+                # one to one
+                alignment_list.extend(match_split[match]['alignment'])
+                del old_fasta_dict[match] # matches[0]
+                del new_fasta_dict[match_split[match]['matches'][0]] # new_seq
 
     stages = [match_identical_sequence, match_truncated_sequence, match_split_subsequence]
     matched_sequence_count = 0
