@@ -17,6 +17,7 @@ try:
 except:
    import pickle
 from os.path import isfile
+from os import remove
 from collections import OrderedDict
 import logging
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)-8s %(message)s')
@@ -112,7 +113,7 @@ def query_yes_no(question, default='yes'):
         else:
             sys.stderr.write('Please respond with "y" or "n".\n')
 
-def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False):
+def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False, report=None):
     """
     Compares two very similar FASTA files and outputs coordinate mappings using a multi stage algorithm:
     Stage 1: Find 100% matches
@@ -281,6 +282,16 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False):
         if debug:
             fasta_dict_to_file(old_fasta_dict, old_fasta_file + '_stage_' + str(stage + 1) + '_unmatched')
             fasta_dict_to_file(new_fasta_dict, new_fasta_file + '_stage_' + str(stage + 1) + '_unmatched')
+        if report is not None:
+            report_header = True
+            if isfile(report):
+                report_header = False
+            with open(report, 'a') as out_report:
+                if report_header:
+                    out_report.write('#Sequence_ID\tSequence_length\tStage\n')
+                out_report.write('#Stage %d - %s:\n' % (stage + 1, stages[stage].__name__))
+                for unmatched in new_fasta_dict:
+                    out_report.write('\t'.join([new_fasta_dict[unmatched]['id'], str(len(new_fasta_dict[unmatched]['seq'])), 'Stage %d' % (stage + 1)]) + '\n')
 
     return alignment_list, old_fasta_dict, new_fasta_dict
 
@@ -299,6 +310,7 @@ if __name__ == '__main__':
     parser.add_argument('old_fasta', type=str, help='The original FASTA file')
     parser.add_argument('new_fasta', type=str, help='The new FASTA file')
     parser.add_argument('-o', '--out', nargs='?', type=argparse.FileType('wb'), default=sys.stdout, help='The output alignment file (default: STDOUT)')
+    parser.add_argument('-r', '--report', type=str, help='Generate a report for the unmatched sequences in new FASTA file.')
     parser.add_argument('-d', '--debug', action='store_true',
                         help='If set, partial results are saved in a *_stage_i_pickle file after each stage, unmatched sequences after each stage are saved in a *_stage_i_unmatched file for both FASTA files.')
     parser.add_argument('-hc', '--header_check', action='store_true',
@@ -317,7 +329,11 @@ if __name__ == '__main__':
                 f.write('\t'.join([str(a) for a in alignment]) + '\n')
     else:
         args = parser.parse_args()
-        alignment_list, old_fasta_dict, new_fasta_dict = fasta_diff(args.old_fasta, args.new_fasta, debug=args.debug, header_check=args.header_check)
+        # remove existing report
+        if args.report:
+            if isfile(args.report):
+                remove(args.report)
+        alignment_list, old_fasta_dict, new_fasta_dict = fasta_diff(args.old_fasta, args.new_fasta, debug=args.debug, header_check=args.header_check, report=args.report)
         if args.debug:
             alignment_list_pickle_file = args.out.name + '_pickle'
             if args.out.name == '<stdout>':
