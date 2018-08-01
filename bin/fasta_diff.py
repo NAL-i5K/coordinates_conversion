@@ -288,8 +288,7 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False, r
                 report_header = False
             with open(report, 'a') as out_report:
                 if report_header:
-                    out_report.write('#Sequence_ID\tSequence_length\tStage\n')
-                out_report.write('#Stage %d - %s:\n' % (stage + 1, stages[stage].__name__))
+                    out_report.write('#Sequence_ID\tSequence_length\tUnmatched_stage\n')
                 for unmatched in new_fasta_dict:
                     out_report.write('\t'.join([new_fasta_dict[unmatched]['id'], str(len(new_fasta_dict[unmatched]['seq'])), 'Stage %d' % (stage + 1)]) + '\n')
 
