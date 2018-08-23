@@ -4,7 +4,10 @@
 
 Conversion programs that use the output from fasta_diff.py to convert reference sequence IDs and coordinates in Gff3, bam, bed, or bedgraph file formats. Main contributors are [Han Lin](https://github.com/hotdogee) (original development) and interns of i5k workspace.
 
-## bin/
+## File directory structure
+
+### bin/
+
 Scripts to convert reference sequence IDs and coordinates in different file formats.
 * fasta_diff.py
     - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/fasta_diff.py)
