@@ -22,6 +22,7 @@ Scripts to convert reference sequence IDs and coordinates in different file form
   * Stage 1: Find 100% matches  
   * Stage 2: Find 100% substrings, where the full length of a new sequence can be found as a substring of a old sequence  
   * Stage 3: Find cases where part of the sequence was converted into Ns  
+  * Stage 4: Find cases where a old sequence is split into two or more new sequences
   * Outputs (match.tsv) the 6 columns as tab-separated values: old_id, old_start, old_end, new_id, new_start, new_end
 
     <code>fasta_diff.py old.fa new.fa > match.tsv</code>
