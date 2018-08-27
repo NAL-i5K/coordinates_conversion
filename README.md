@@ -1,5 +1,8 @@
-## coordinates_conversion
-Conversion programs that use the output from fasta_diff.py to convert reference sequence IDs and coordinates in Gff3, bam, bed, or bedgraph file formats. Main contributors are [Han Lin](https://github.com/hotdogee) (original development) and [LiMei Chiang](https://github.com/dytk2134) (continued development).
+# coordinates_conversion
+
+[![Build Status](https://travis-ci.org/NAL-i5K/coordinates_conversion.svg?branch=master)](https://travis-ci.org/NAL-i5K/coordinates_conversion)
+
+Conversion programs that use the output from fasta_diff.py to convert reference sequence IDs and coordinates in Gff3, bam, bed, or bedgraph file formats. Main contributors are [Han Lin](https://github.com/hotdogee) (original development) and interns of i5k workspace.
 
 ## bin/
 Scripts to convert reference sequence IDs and coordinates in different file formats.
