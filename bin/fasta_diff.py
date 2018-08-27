@@ -418,7 +418,7 @@ if __name__ == '__main__':
         pickle.dump(alignment_list, open('alignment_list.pickle', 'wb'))
         with open('alignment_list.tsv', 'wb') as f:
             for alignment in alignment_list:
-              f.write('\t'.join([str(a) for a in alignment]) + '\n')
+                f.write('\t'.join([str(a) for a in alignment]) + '\n')
     else:
         args = parser.parse_args()
         # remove existing report
