@@ -14,6 +14,10 @@ from os.path import isfile
 from os import remove
 from collections import OrderedDict
 import logging
+import sys
+import argparse
+from textwrap import dedent
+
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)-8s %(message)s')
 
 
@@ -323,7 +327,7 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False, r
         if onetomultiple:
             alignment_list.extend(stage_four_result)
         # add empty to final result
-                                                                    
+                                                 
     stages = [match_identical_sequence, match_truncated_sequence, match_split_subsequence,one_to_multiple_match]
     matched_sequence_count = 0
     for stage in range(len(stages)):
@@ -383,10 +387,7 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False, r
 
     return alignment_list, old_fasta_dict, new_fasta_dict
 
-if __name__ == '__main__':
-    import sys
-    import argparse
-    from textwrap import dedent
+def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description=dedent("""\
     Compares two very similar FASTA files and outputs coordinate mappings using a multi stage algorithm:
     Stage 1: Find 100% matches
@@ -430,3 +431,7 @@ if __name__ == '__main__':
         for alignment in alignment_list:
             args.out.write('\t'.join([str(a) for a in alignment]) + '\n')
         args.out.close()
+
+
+if __name__ == '__main__':
+    main()
