@@ -53,7 +53,7 @@ class BamUpdater(object):
         """
         tsv_format = [str, int, int, str, int, int]
         alignment_list_tsv_file_f = alignment_list_tsv_file
-        if isinstance(alignment_list_tsv_file, str): 
+        if isinstance(alignment_list_tsv_file, str):
             logging.info('  Reading alignment data from: %s...', alignment_list_tsv_file_f.name)
             alignment_list_tsv_file_f = open(alignment_list_tsv_file, 'rb')
 
@@ -72,7 +72,7 @@ class BamUpdater(object):
     def _update_features(self):
         """
         Goes through the bam file, updating the reference sequence names and coordinates of each feature and
-        checks for removed reference sequence names and coordinates. 
+        checks for removed reference sequence names and coordinates.
         """
         from os.path import splitext
         bam_root, bam_ext = splitext(self.bam_file)
@@ -87,6 +87,7 @@ class BamUpdater(object):
         bam_header_new = {}
         header_new_ID_dict = {}
         header_num_count = 0
+        written_ID = set()
         logging.info('  Update tag SN and LN....')
         for k,v in bam_header_old.iteritems():
             if k == 'SQ':
@@ -94,13 +95,17 @@ class BamUpdater(object):
                 for reference_sequence_dict in v:
                     if 'SN' in reference_sequence_dict:
                         if reference_sequence_dict['SN'] in self.alignment_dict:
-                            header_new_ID_dict[reference_sequence_dict['SN']] = header_num_count
-                            mappings = self.alignment_dict[reference_sequence_dict['SN']]
-                            reference_sequence_dict['SN'] = mappings[0][3]
-                            if 'LN' in reference_sequence_dict:                               
-                                reference_sequence_dict['LN'] = mappings[len(mappings)-1][5] - mappings[0][4]
-                            bam_header_new[k].append(reference_sequence_dict)
-                            header_num_count += 1
+                            mappings = sorted(self.alignment_dict[reference_sequence_dict['SN']], key=lambda x: (x[3], x[4]))
+                            for mapping in mappings:
+                                if mapping[3] not in written_ID:
+                                    header_new_ID_dict[(reference_sequence_dict['SN'],mapping[3])] = header_num_count
+                                    reference_sequence_dict['SN'] = mapping[3]
+                                    if 'LN' in reference_sequence_dict:
+                                        filter_mappings = filter(lambda m: m[3] == mapping[3], mappings)
+                                        reference_sequence_dict['LN'] = filter_mappings[len(filter_mappings)-1][5] - filter_mappings[0][4]
+                                    bam_header_new[k].append(reference_sequence_dict)
+                                    header_num_count += 1
+                                    written_ID.add(mapping[3])
             elif k =='PG':
                 bam_header_new[k] = v
                 if v[0]['ID'] in Program_list:
@@ -119,18 +124,16 @@ class BamUpdater(object):
         elif Program_ID == 'BWA':
             Custom_tag = ['XA','X0','X1','XN','XM','XO','XG','XT','XS','XF','XE']
 
-        
-
         updated_file_f = pysam.AlignmentFile(updated_file,'wb',header = bam_header_new)
         removed_file_f = pysam.AlignmentFile(removed_file,'wb',header = in_f.header)
         bam_update_list = []
-     
+
         for read in in_f.fetch(until_eof=True):
             #If a alignment doesn't have reference name, it will directly add to updated bam file.
             if read.reference_id == -1:
                 updated_count+=1
                 updated_file_f.write(read)
-            else:    
+            else:
                 if read.reference_name in self.alignment_dict:
                     start, end = int(read.reference_start), int(read.reference_end) # positive 0-based integer coordinates
                     mappings = self.alignment_dict[read.reference_name]
@@ -141,10 +144,14 @@ class BamUpdater(object):
                         removed_count+=1
                         removed_file_f.write(read)
                     else:
+                        if start_mapping[0][3] != end_mapping[0][3]:
+                            removed_count+=1
+                            removed_file_f.write(read)
+                            continue
                         read_out = pysam.AlignedSegment()
                         read_out.query_name = read.query_name
                         read_out.flag = read.flag
-                        read_out.reference_id = header_new_ID_dict[read.reference_name]
+                        read_out.reference_id = header_new_ID_dict[(read.reference_name, start_mapping[0][3])]
                         read_out.reference_start = int(start - start_mapping[0][1] + start_mapping[0][4])
                         read_out.mapping_quality = read.mapping_quality
                         read_out.cigar = read.cigar
@@ -162,7 +169,7 @@ class BamUpdater(object):
                                     removed_file_f.write(read)
                                     continue
                                 else:
-                                    read_out.next_reference_id = header_new_ID_dict[read.next_reference_name]
+                                    read_out.next_reference_id = header_new_ID_dict[(read.next_reference_name,start_next_mapping[0][3])]
                                     read_out.next_reference_start = int(next_start - start_next_mapping[0][1] + start_next_mapping[0][4])
                             else:
                                 removed_count+=1
@@ -171,14 +178,13 @@ class BamUpdater(object):
                         elif read.next_reference_id == -1:
                             read_out.next_reference_id = read.next_reference_id
                             read_out.next_reference_start = read.next_reference_start
-                                                                 
-                                
+
 	                updated_count +=1
                         updated_file_f.write(read_out)
 	        else:
 		    removed_count+=1
 	            removed_file_f.write(read)
-                    
+
         in_f.close()
         updated_file_f.close()
         removed_file_f.close()
@@ -211,7 +217,3 @@ if __name__ == '__main__':
     Bam_updater = BamUpdater(args.alignment_file, args.updated_postfix, args.removed_postfix)
     for Bam_file in args.bam_files:
         Bam_updater.update(Bam_file)
-
-
- 	
-   

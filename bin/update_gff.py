@@ -166,11 +166,15 @@ class GffUpdater(object):
                             for lc in self.gff_root_line_dict[self.gff_line_root_list[current_line_num]]:
                                 self.gff_line_status_dict[lc] = GffUpdater.POSITION_REMOVED
                         else:
-                            tokens[0] = mappings[0][3]
-                            tokens[3] = str(start - start_mapping[0][1] + start_mapping[0][4])
-                            tokens[4] = str(end - end_mapping[0][1] + end_mapping[0][4])
-                            self.gff_line_status_dict[current_line_num] = GffUpdater.KEEP
-                            self.gff_converted_line_dict[current_line_num] = '\t'.join(tokens)
+                            if start_mapping[0][3] != end_mapping[0][3]:
+                                for lc in self.gff_root_line_dict[self.gff_line_root_list[current_line_num]]:
+                                    self.gff_line_status_dict[lc] = GffUpdater.POSITION_REMOVED
+                            else:
+                                tokens[0] = start_mapping[0][3]# should same with end_mapping[0][3]
+                                tokens[3] = str(start - start_mapping[0][1] + start_mapping[0][4])
+                                tokens[4] = str(end - end_mapping[0][1] + end_mapping[0][4])
+                                self.gff_line_status_dict[current_line_num] = GffUpdater.KEEP
+                                self.gff_converted_line_dict[current_line_num] = '\t'.join(tokens)
                     else:
                         for lc in self.gff_root_line_dict[self.gff_line_root_list[current_line_num]]:
                             self.gff_line_status_dict[lc] = GffUpdater.SEQUENCE_REMOVED
@@ -292,11 +296,15 @@ if __name__ == '__main__':
                                 for lc in gff_root_line_dict[gff_line_root_list[line_count]]:
                                     gff_line_status_dict[lc] = EXTRA_NS
                             else:
-                                tokens[0] = mappings[0][3]
-                                tokens[3] = str(start - start_mapping[0][1] + start_mapping[0][4])
-                                tokens[4] = str(end - end_mapping[0][1] + end_mapping[0][4])
-                                gff_line_status_dict[line_count] = KEEP
-                                gff_converted_line_dict[line_count] = '\t'.join(tokens)
+                                if start_mapping[0][3] != end_mapping[0][3]:
+                                    for lc in gff_root_line_dict[gff_line_root_list[line_count]]:
+                                        gff_line_status_dict[lc] = REMOVED
+                                else:
+                                    tokens[0] = start_mapping[0][3]
+                                    tokens[3] = str(start - start_mapping[0][1] + start_mapping[0][4])
+                                    tokens[4] = str(end - end_mapping[0][1] + end_mapping[0][4])
+                                    gff_line_status_dict[line_count] = KEEP
+                                    gff_converted_line_dict[line_count] = '\t'.join(tokens)
                         else:
                             for lc in gff_root_line_dict[gff_line_root_list[line_count]]:
                                 gff_line_status_dict[lc] = REMOVED
