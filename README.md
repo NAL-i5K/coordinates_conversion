@@ -4,7 +4,6 @@
 
 Conversion programs that use the output from fasta_diff.py to convert reference sequence IDs and coordinates in Gff3, bam, bed, or bedgraph file formats. Main contributors are [Han Lin](https://github.com/hotdogee) (original development) and interns of i5k workspace.
 
-## bin/
 Scripts to convert reference sequence IDs and coordinates in different file formats.
 * fasta_diff.py
     - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/fasta_diff.py)
@@ -28,41 +27,42 @@ Scripts to convert reference sequence IDs and coordinates in different file form
   * Stage 4: Find cases where a old sequence is split into two or more new sequences
   * Outputs (match.tsv) the 6 columns as tab-separated values: old_id, old_start, old_end, new_id, new_start, new_end
 
-    <code>fasta_diff.py old.fa new.fa > match.tsv</code>
+    `fasta_diff.py old.fa new.fa > match.tsv`
 
 2. Select a conversion script that matches your file format  
   * [Gff3 format](https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md): update_gff.py
   * [Bam format](http://samtools.github.io/hts-specs/SAMv1.pdf): bam_update.py
   * [Bed format](https://genome.ucsc.edu/FAQ/FAQformat#format1): bed_update.py
   * [Bedgraph format](https://genome.ucsc.edu/goldenpath/help/bedgraph.html): bedgraph_update.py
-    
+
 3. Run conversion script:
   * update_gff.py  
 
-    <code> update_gff.py –a match.tsv a.gff b.gff c.gff </code>  
+    `update_gff.py –a match.tsv a.gff b.gff c.gff`
 
   * update_bam.py  
     * The following programs need to be installed before running this program:
       * [pysam](http://pysam.readthedocs.io/en/latest/index.html)
 
-        <code>pip install pysam</code>
+        `pip install pysam`
 
       * [samtools](http://samtools.sourceforge.net/)
     * If you have a bam file without a corresponding index file (.bai), you can generate one using:  
 
-    <code> samtools index aln.bam </code>  
+    `samtools index aln.bam`
+
     * Then use update_bam.py to convert your bam files
 
-    <code> update_bam.py –a match.tsv a.bam b.bam c.bam </code>  
+    `update_bam.py –a match.tsv a.bam b.bam c.bam`
 
   * update_bed.py  
 
-    <code> update_bed.py –a match.tsv a.bed b.bed c.bed </code>  
+    `update_bed.py –a match.tsv a.bed b.bed c.bed`
 
   * update_bedgraph.py  
 
-    <code> update_bedgraph.py –a match.tsv a.bedgraph b.bedgraph c.bedgraph </code>  
+    `update_bedgraph.py –a match.tsv a.bedgraph b.bedgraph c.bedgraph`
     
   * update_vcf.py  
 
-    <code> update_vcf.py –a match.tsv -ref new_assembly.fa a.vcf b.vcf c.vcf </code> 
+    `update_vcf.py –a match.tsv -ref new_assembly.fa a.vcf b.vcf c.vcf`
