@@ -38,6 +38,8 @@ def fasta_file_to_dict(fasta_file, id=True, header=False, seq=False):
 
     for line in fasta_file_f:
         line = line.strip()
+        if not line:
+            continue
         if line[0] == '>':
             count += 1
             key = '||'.join([entry[i] for i in flags if flags[i]])
