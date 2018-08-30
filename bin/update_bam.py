@@ -99,12 +99,13 @@ class BamUpdater(object):
                             mappings = sorted(self.alignment_dict[reference_sequence_dict['SN']], key=lambda x: (x[3], x[4]))
                             for mapping in mappings:
                                 if mapping[3] not in written_ID:
-                                    header_new_ID_dict[(reference_sequence_dict['SN'],mapping[3])] = header_num_count
-                                    reference_sequence_dict['SN'] = mapping[3]
-                                    if 'LN' in reference_sequence_dict:
+                                    header_new_ID_dict[(mapping[0], mapping[3])] = header_num_count
+                                    updated_reference_sequence_dict = dict(reference_sequence_dict)
+                                    updated_reference_sequence_dict['SN'] = mapping[3]
+                                    if 'LN' in updated_reference_sequence_dict:
                                         filter_mappings = filter(lambda m: m[3] == mapping[3], mappings)
-                                        reference_sequence_dict['LN'] = filter_mappings[len(filter_mappings)-1][5] - filter_mappings[0][4]
-                                    bam_header_new[k].append(reference_sequence_dict)
+                                        updated_reference_sequence_dict['LN'] = filter_mappings[len(filter_mappings)-1][5] - filter_mappings[0][4]
+                                    bam_header_new[k].append(updated_reference_sequence_dict)
                                     header_num_count += 1
                                     written_ID.add(mapping[3])
             elif k =='PG':
