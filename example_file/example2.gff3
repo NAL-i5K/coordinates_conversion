@@ -1,0 +1,15 @@
+##gff-version 3
+Contig15174	EVM	gene	48	497	.	-	.	ID=evm.TU.Contig15174.1;Name=EVM%20prediction%20Contig15174.1
+Contig15174	EVM	mRNA	48	497	.	-	.	ID=evm.model.Contig15174.1;Parent=evm.TU.Contig15174.1;Name=EVM%20prediction%20Contig15174.1
+Contig15174	EVM	exon	48	497	.	-	.	ID=evm.model.Contig15174.1.exon1;Parent=evm.model.Contig15174.1
+Contig15174	EVM	CDS	48	497	.	-	0	ID=cds.evm.model.Contig15174.1;Parent=evm.model.Contig15174.1
+###
+Contig31538	.	gene	498	1911	.	+	.	ID=evm.TU.Contig31538.1;Name=EVM%20prediction%20Contig31538.1
+Contig31538	.	mRNA	498	1911	.	+	.	ID=evm.model.Contig31538.1;Parent=evm.TU.Contig31538.1;Name=EVM%20prediction%20Contig31538.1
+Contig31538	.	exon	498	593	.	+	.	ID=evm.model.Contig31538.1.exon1;Parent=evm.model.Contig31538.1
+Contig31538	.	exon	1445	1634	.	+	.	ID=evm.model.Contig31538.1.exon2;Parent=evm.model.Contig31538.1
+Contig31538	.	exon	1844	1911	.	+	.	ID=evm.model.Contig31538.1.exon3;Parent=evm.model.Contig31538.1
+Contig31538	.	CDS	498	593	.	+	0	ID=cds.evm.model.Contig31538.1;Parent=evm.model.Contig31538.1
+Contig31538	.	CDS	1445	1634	.	+	0	ID=cds.evm.model.Contig31538.1;Parent=evm.model.Contig31538.1
+Contig31538	.	CDS	1844	1911	.	+	2	ID=cds.evm.model.Contig31538.1;Parent=evm.model.Contig31538.1
+###
