@@ -171,11 +171,15 @@ class VCFUpdater(object):
                             removed_file_f.write(line_strip + '\n')
                             removed_count += 1
                         else:
-                            tokens[0] = mappings[0][3]
-                            tokens[1] = str(start - start_mapping[0][1] + start_mapping[0][4])
-                            keep = '\t'.join(tokens)
-                            updated_file_f.write(keep + '\n')
-                            updated_count += 1
+                            if start_mapping[0][3] != end_mapping[0][3]:
+                                removed_file_f.write(line_strip + '\n')
+                                removed_count += 1
+                            else:
+                                tokens[0] = start_mapping[0][3]
+                                tokens[1] = str(start - start_mapping[0][1] + start_mapping[0][4])
+                                keep = '\t'.join(tokens)
+                                updated_file_f.write(keep + '\n')
+                                updated_count += 1
 
                     else:
                         removed_file_f.write(line_strip + '\n')
