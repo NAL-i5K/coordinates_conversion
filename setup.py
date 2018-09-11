@@ -8,12 +8,12 @@ setup(
     install_requires=['pysam'],
     entry_points={
         'console_scripts': [
-            'fasta_diff=coordinates_conversion.fasta_diff:main',
-            'update_bam=coordinates_conversion.update_bam:main',
-            'update_bed=coordinates_conversion.update_bed:main',
-            'update_bedgraph=coordinates_conversion.update_bedgraph:main',
-            'update_gff=coordinates_conversion.update_gff:main',
-            'update_vcf=coordinates_conversion.update_vcf:main',
+            'fasta_diff=coordinates_conversion.bin.fasta_diff:main',
+            'update_bam=coordinates_conversion.bin.update_bam:main',
+            'update_bed=coordinates_conversion.bin.update_bed:main',
+            'update_bedgraph=coordinates_conversion.bin.update_bedgraph:main',
+            'update_gff=coordinates_conversion.bin.update_gff:main',
+            'update_vcf=coordinates_conversion.bin.update_vcf:main',
         ]
     }
 )

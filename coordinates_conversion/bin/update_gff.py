@@ -238,7 +238,7 @@ def main():
     are removed or replaced with Ns, are written to a new file with '_removed'(default) appended to the original GFF3 file name.
 
     Example:
-        fasta_diff old.fa new.fa | %(prog)s a.gff b.gff c.gff
+        fasta_diff example_file/old.fa example_file/new.fa | %(prog)s example_file/example1.gff3 example_file/example2.gff3
     """))
     parser.add_argument('gff_files', metavar='GFF_FILE', nargs='+', type=str, help='List one or more GFF3 files to be updated')
     parser.add_argument('-a', '--alignment_file', type=argparse.FileType('rb'), default=sys.stdin,
