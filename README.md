@@ -18,17 +18,17 @@ Conversion programs that use the output from fasta_diff to convert reference seq
 Scripts to convert reference sequence IDs and coordinates in different file formats.
 
 - fasta_diff
-  - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/fasta_diff.py)
+  - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/fasta_diff)
 - update_gff
-  - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-gff)
+  - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update_gff)
 - update_bam
-  - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-bam)
+  - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update_bam)
 - update_bed
-  - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-bed)
+  - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update_bed)
 - update_bedgraph
-  - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-bedgraph)
+  - [wiki page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update_bedgraph)
 - update_vcf
-  - [wiki_page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update-vcf)
+  - [wiki_page](https://github.com/NAL-i5K/coordinates_conversion/wiki/update_vcf)
 
 ## Quick start
 

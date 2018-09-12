@@ -201,7 +201,7 @@ def main():
     Feature that can not be updated, due to the id being removed completely or the feature contains regions that
     are removed or replaced with Ns, are written to a new file with '_removed'(default) appended to the original VCF file name.
     Example:
-        fasta_diff example_file/old.fa example_file/new.fa | %(prog)s example_file/example.vcf
+        fasta_diff example_file/old.fa example_file/new.fa | %(prog)s -ref example_file/new.fa example_file/example.vcf
     """))
     parser.add_argument('vcf_files', metavar='VCF_FILE', nargs='+', type=str, help='List one or more VCF files to be updated')
     parser.add_argument('-a', '--alignment_file', type=argparse.FileType('rb'), default=sys.stdin,

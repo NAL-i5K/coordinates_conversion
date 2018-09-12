@@ -11,4 +11,5 @@ script:
   - update_bed -a match.tsv example_file/example.bed
   - update_bedgraph -a match.tsv example_file/example.bedGraph
   - update_gff -a match.tsv example_file/example1.gff3 example_file/example2.gff3
+  - update_vcf -a match.tsv -ref example_file/new.fa example_file/example.vcf
   - update_vcf -a match.tsv example_file/example.vcf
