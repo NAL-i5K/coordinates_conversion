@@ -3,10 +3,13 @@ language: python
 python: 2.7
 
 before_script:
-  - wget "ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/188/095/GCF_000188095.2_BIMP_2.1/GCF_000188095.2_BIMP_2.1_genomic.fna.gz"
-  - wget "http://hymenopteragenome.org/beebase/sites/hymenopteragenome.org.beebase/files/data/consortium_data/Bimp_2.0_scaffolds.fa.gz"
-  - gzip -d GCF_000188095.2_BIMP_2.1_genomic.fna.gz
-  - gzip -d Bimp_2.0_scaffolds.fa.gz
+  - pip install .
 
 script:
-  - python bin/fasta_diff.py Bimp_2.0_scaffolds.fa GCF_000188095.2_BIMP_2.1_genomic.fna -o match.tsv -r report.txt
+  - fasta_diff example_file/old.fa example_file/new.fa -o match.tsv -r report.txt
+  - update_bam -a match.tsv example_file/example.bam
+  - update_bed -a match.tsv example_file/example.bed
+  - update_bedgraph -a match.tsv example_file/example.bedGraph
+  - update_gff -a match.tsv example_file/example1.gff3 example_file/example2.gff3
+  - update_vcf -a match.tsv -ref example_file/new.fa example_file/example.vcf
+  - update_vcf -a match.tsv example_file/example.vcf
