@@ -322,6 +322,7 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False, r
                                     del new_fasta_dict[new]
 
         if onetomultiple:
+            global stage_four_result
             alignment_list.extend(stage_four_result)
         # add empty to final result
 
