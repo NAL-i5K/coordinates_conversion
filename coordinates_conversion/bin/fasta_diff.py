@@ -274,6 +274,7 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False, r
 
     def one_to_multiple_match():
         stagelist=list()
+	stage_four_result=list()
         for match in onetomultiple:
             # one to mutiple
             if len(onetomultiple[match]['matches']) > 1:
@@ -308,7 +309,6 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False, r
                                     delete_pairs.update((pair1,pair2))
                                     # add overlap pair to delete_pairs
 
-                stage_four_result=list()
                 for delete in stagelist:
                    if (delete[0],delete[3]) not in delete_pairs:
                        stage_four_result.append(delete)
