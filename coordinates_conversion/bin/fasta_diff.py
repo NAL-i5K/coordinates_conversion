@@ -1,4 +1,4 @@
-#! C:\python27\python.exe
+#! /usr/bin/env python2.7
 
 """
 Compare two very similar FASTA files and output coordinate mappings
