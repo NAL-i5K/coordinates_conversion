@@ -430,11 +430,6 @@ def main():
                 alignment_list_pickle_file = 'alignment_list_pickle'
             pickle.dump(alignment_list, open(alignment_list_pickle_file, 'wb'))
         for alignment in alignment_list:
-<<<<<<< HEAD
-=======
-            print('\t'.join(str(a) for a in alignment))
-            
->>>>>>> 10705b53b57c3a5e72add344f8d91907b03ca510
             args.out.write(('\t'.join(str(a) for a in alignment) + '\n').encode('ascii'))
         args.out.close()
 
