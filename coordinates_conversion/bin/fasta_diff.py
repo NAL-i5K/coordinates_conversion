@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.7
+#! C:\python27\python.exe
 
 """
 Compare two very similar FASTA files and output coordinate mappings
@@ -33,15 +33,14 @@ def fasta_file_to_dict(fasta_file, id=True, header=False, seq=False):
     fasta_file_f = fasta_file
     if isinstance(fasta_file, str):
         fasta_file_f = open(fasta_file, 'rb')
-
-    fasta_dict = dict()
+    
+    fasta_dict = {}
     flags = OrderedDict([('id', id), ('header', header), ('seq', seq)])
     entry = dict([('id', ''), ('header', ''), ('seq', '')])
     count = 0
-    line_num = 0
-
+    line_num = 0    
     for line in fasta_file_f:
-        line = line.strip()
+        line = str(line.strip(), 'utf-8')#python36
         if not line:
             continue
         if line[0] == '>':
@@ -58,7 +57,6 @@ def fasta_file_to_dict(fasta_file, id=True, header=False, seq=False):
         else:
             entry['seq'] += line.upper()
         line_num += 1
-
     if isinstance(fasta_file, str):
         fasta_file_f.close()
 
@@ -67,7 +65,6 @@ def fasta_file_to_dict(fasta_file, id=True, header=False, seq=False):
         if key in fasta_dict:
             logging.warning('%s : Line %d : Duplicate %s [%s] : ID = [%s].', fasta_file_f.name, line_num, '||'.join([i for i in flags if flags[i]]), key[:25] + (key[25:] and '..'), entry['id'])
         fasta_dict[key] = entry
-
     return fasta_dict, count
 
 def fasta_dict_to_file(fasta_dict, fasta_file):
@@ -85,7 +82,7 @@ def fasta_dict_to_file(fasta_dict, fasta_file):
     fasta_file.close()
 
 def query_yes_no(question, default='yes'):
-    """Ask a yes/no question via raw_input() and return their answer.
+    """Ask a yes/no question via input() and return their answer.
 
     'question' is a string that is presented to the user.
     'default' is the presumed answer if the user just hits <Enter>.
@@ -107,7 +104,8 @@ def query_yes_no(question, default='yes'):
 
     while True:
         sys.stderr.write(question + prompt)
-        choice = raw_input().strip().lower()
+        #choice = raw_input().strip().lower() python2.7
+        choice = input().strip().lower()
         if default is not None and choice == '':
             return valid[default]
         elif choice in valid:
@@ -135,7 +133,8 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False, r
     def match_identical_sequence():
         # find 100% matches
         #[old_id, old_start, old_end, new_id, new_start, new_end]
-        old_seqs = old_fasta_dict.keys()
+        old_seqs = list(old_fasta_dict.keys())
+       
         for seq in old_seqs:
             if seq in new_fasta_dict:
                 alignment = [old_fasta_dict[seq]['id'], 0, len(seq), new_fasta_dict[seq]['id'], 0, len(seq)]
@@ -152,7 +151,8 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False, r
         match_truncated = dict() # {matches[0]: {'matches': {new_seq}, 'alignment': [oldid, oldstart, oldend, newid, newstart, newend]}
         match_truncated_order = list()
         for new_seq in new_seqs:
-            matches = filter(lambda old_seq: new_seq in old_seq, old_seqs)
+            #matches = filter(lambda old_seq: new_seq in old_seq, old_seqs) 
+            matches = [old_seq for old_seq in old_seqs if new_seq in old_seq]
             if len(matches) == 1:
                 start = matches[0].find(new_seq)
                 alignment = [old_fasta_dict[matches[0]]['id'], start, start + len(new_seq), new_fasta_dict[new_seq]['id'], 0, len(new_seq)]
@@ -274,7 +274,7 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False, r
 
     def one_to_multiple_match():
         stagelist=list()
-	stage_four_result=list()
+        stage_four_result=list()
         for match in onetomultiple:
             # one to mutiple
             if len(onetomultiple[match]['matches']) > 1:
@@ -320,7 +320,6 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False, r
                            if new in new_fasta_dict:
                                 if new_fasta_dict[new]['id']==delete[3]:
                                     del new_fasta_dict[new]
-
         if onetomultiple:
             alignment_list.extend(stage_four_result)
         # add empty to final result
@@ -340,6 +339,7 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False, r
                 #161988 unique sequences in new fasta file
                 logging.info('Reading old FASTA file (%s)...', old_fasta_file)
                 old_fasta_dict, old_fasta_count = fasta_file_to_dict(old_fasta_file, id=False, header=False, seq=True)
+                
                 if not len(old_fasta_dict) == old_fasta_count:
                     logging.warning('  Duplicate sequences detected in old FASTA file, %d unique sequences out of a total of %d sequences', len(old_fasta_dict), old_fasta_count)
                     if not query_yes_no('Ignore and continue?'):
@@ -423,15 +423,15 @@ def main():
             if isfile(args.report):
                 remove(args.report)
         alignment_list, old_fasta_dict, new_fasta_dict = fasta_diff(args.old_fasta, args.new_fasta, debug=args.debug, header_check=args.header_check, report=args.report)
+        
         if args.debug:
             alignment_list_pickle_file = args.out.name + '_pickle'
             if args.out.name == '<stdout>':
                 alignment_list_pickle_file = 'alignment_list_pickle'
             pickle.dump(alignment_list, open(alignment_list_pickle_file, 'wb'))
         for alignment in alignment_list:
-            args.out.write('\t'.join([str(a) for a in alignment]) + '\n')
+            args.out.write(('\t'.join(str(a) for a in alignment) + '\n').encode('ascii'))
         args.out.close()
-
 
 if __name__ == '__main__':
     main()
