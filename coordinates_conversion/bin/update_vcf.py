@@ -58,6 +58,7 @@ class VCFUpdater(object):
 
         alignment_list = []
         for line in alignment_list_tsv_file_f:
+            line = str(line,'utf-8')
             alignment_list.append([f(t) for f, t in zip(tsv_format, line.split('\t'))])
 
         if isinstance(alignment_list_tsv_file, str):
@@ -65,7 +66,7 @@ class VCFUpdater(object):
         else:
             logging.info('Reading alignment data from: %s...', alignment_list_tsv_file_f.name)
         logging.info('  Alignments: %d', len(alignment_list))
-
+        
         return alignment_list
 
     def fasta_file_sequence_length(self):
@@ -106,14 +107,16 @@ class VCFUpdater(object):
         removed_file = VCF_root + self.removed_postfix + VCF_ext
         updated_count = 0
         removed_count = 0
-        updated_file_f = open(updated_file, 'wb')
-        removed_file_f = open(removed_file, 'wb')
+        updated_file_f = open(updated_file, 'w')
+        removed_file_f = open(removed_file, 'w')
         contig_key = ['ID', 'length']
         contig_sort_map = defaultdict(int, zip(contig_key, range(len(contig_key), 0, -1)))
         if self.reference:
             sequence_length = self.fasta_file_sequence_length()
         with open(self.vcf_file, 'rb') as in_f:
             for line in in_f:
+                flag = True
+                line = str(line,'utf-8')
                 if len(line.strip()) == 0:
                     # ingore blank line
                     continue
@@ -126,9 +129,9 @@ class VCFUpdater(object):
                         contig = re.search('##contig=<(.+)>', meta_information).group(1)
                         contig_dict = dict(re.findall('([^=,]+)=([^=,\n]+)', contig))
                         # update ID
-                        if 'ID' in contig_dict and contig_dict['ID'] in self.alignment_dict:
+                        if 'ID' in contig_dict and (contig_dict['ID'] in self.alignment_dict):
                             mappings = self.alignment_dict[contig_dict['ID']]
-                            mappings_dict = dict()
+                            mappings_dict = {}
                             for mapping in mappings:
                                 if mapping[3] not in mappings_dict:
                                     mappings_dict[mapping[3]] = {'min':mapping[4],'max':mapping[5],'length':mapping[5]-mapping[4]}
@@ -168,8 +171,8 @@ class VCFUpdater(object):
                     if tokens[0] in self.alignment_dict:
                         start, end = int(tokens[1]), int(tokens[1]) -1 + len(tokens[3])# positive 1-based integer coordinates
                         mappings = self.alignment_dict[tokens[0]]
-                        start_mapping = filter(lambda m: m[1] < start and start <= m[2], mappings)
-                        end_mapping = filter(lambda m: m[1] < end and end <= m[2], mappings)
+                        start_mapping = [m for m in mappings if m[1] < start and start <= m[2]]
+                        end_mapping = [m for m in mappings if m[1] < end and end <= m[2]]
                         # we got a bad annotation if start or end pos is N
                         if len(start_mapping) != 1 or len(end_mapping) != 1:
                             removed_file_f.write(line_strip + '\n')
