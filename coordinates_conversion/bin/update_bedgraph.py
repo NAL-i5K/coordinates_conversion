@@ -20,6 +20,7 @@ class BedGraphUpdater(object):
     def __init__(self, alignment_list_tsv_file, updated_postfix, removed_postfix):
         self.alignment_list = BedGraphUpdater.read_alignment_list_tsv(alignment_list_tsv_file)
         self.alignment_dict = defaultdict(list)
+
         for a in self.alignment_list:
             self.alignment_dict[a[0]].append(a)
         self.updated_postfix = updated_postfix
@@ -49,7 +50,7 @@ class BedGraphUpdater(object):
            alignment_list_tsv_file_f = open(alignment_list_tsv_file, 'rb')
         alignment_list = []
         for line in alignment_list_tsv_file_f:
-            line=str(line)
+            line=str(line,'utf-8')
             alignment_list.append([f(t) for f, t in zip(tsv_format, line.split('\t'))])
         if isinstance(alignment_list_tsv_file, str):
             alignment_list_tsv_file_f.close()
@@ -74,14 +75,15 @@ class BedGraphUpdater(object):
         removed_file_f = open(removed_file, 'w')
         with open(self.BedGraph_file, 'rb') as in_f:
             for line in in_f:
-                line=str(line)
+                line = str(line,'utf-8')
                 line_strip = line.strip()
                 tokens = line_strip.split('\t')
+                #print(self.alignment_dict)
                 if tokens[0] in self.alignment_dict:
                     start, end = int(tokens[1]), int(tokens[2])
                     mappings = self.alignment_dict[tokens[0]]
-                    start_mapping = filter(lambda m: m[1] <= start and start <= m[2], mappings)
-                    end_mapping = filter(lambda m: m[1] <= end and end <= m[2], mappings)
+                    start_mapping = [m for m in mappings if m[1] <= start and start <= m[2]]
+                    end_mapping = [m for m in mappings if m[1] <= end and end <= m[2]]
                     if len(start_mapping) != 1 or len(end_mapping) != 1:
                         removed_count+=1
                         removed_file_f.write(line)
@@ -96,7 +98,6 @@ class BedGraphUpdater(object):
                             keep = '\t'.join(tokens)
                             updated_count +=1
                             updated_file_f.write(keep+"\n")
-
                 else:
                     removed_count+=1
                     removed_file_f.write(line)
