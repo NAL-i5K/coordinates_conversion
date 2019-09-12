@@ -1,9 +1,9 @@
 os: linux
 language: python
-python: 2.7
+python: 3
 
 before_script:
-  - pip install .
+  - pip3 install .
 
 script:
   - fasta_diff example_file/old.fa example_file/new.fa -o match.tsv -r report.txt
