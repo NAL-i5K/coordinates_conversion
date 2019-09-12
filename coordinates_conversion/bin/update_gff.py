@@ -272,83 +272,10 @@ def main():
                         help='The filename postfix for removed features (default: "_removed")')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
 
-    test_lv = 0 # debug
-    if test_lv == 1:
-        REMOVED = 3
-        EXTRA_NS = 2
-        KEEP = 1
-        from os.path import splitext
-        from glob import glob
-        try:
-            import cPickle as pickle
-        except:
-            import pickle
-        gff_files = glob('*.gff')
-        for gff_file in gff_files:
-            args = parser.parse_args(['alignment_list_pickle', gff_file])
-            alignment_list = pickle.load(open(args.alignment_file, 'rb'))
-            alignment_dict = defaultdict(list)
-            for a in alignment_list:
-                alignment_dict[a[0]].append(a)
-            # types = REMOVED, EXTRA_NS, KEEP
-            gff_line_root_list, gff_root_line_dict = gff_get_root(args.gff_file)
-            gff_line_status_dict = {}
-            gff_line_list = []
-            gff_converted_line_dict = {}
-            with open(args.gff_file, 'rb') as in_f:
-                
-                line_count = 0
-                for line in in_f:
-                    line = str(line)
-                    if line[0] == '#':
-                        gff_line_status_dict[line_count] = KEEP
-                        gff_converted_line_dict[line_count] = line
-                    elif line_count not in gff_line_status_dict or gff_line_status_dict[line_count] == KEEP:
-                        tokens = line.split('\t')
-                        if tokens[0] in alignment_dict:
-                            start, end = int(tokens[3]), int(tokens[4]) # positive 1-based integer coordinates
-                            mappings = alignment_dict[tokens[0]]
-                            start_mapping = [m for m in mappings if m[1] < start and start <= m[2]]
-                            end_mapping = [m for m in mappings if m[1] < end and end <= m[2]]
-                            # we got a bad annotation if start or end pos is N
-                            if len(start_mapping) != 1 or len(end_mapping) != 1:
-                                for lc in gff_root_line_dict[gff_line_root_list[line_count]]:
-                                    gff_line_status_dict[lc] = EXTRA_NS
-                            else:
-                                if start_mapping[0][3] != end_mapping[0][3]:
-                                    for lc in gff_root_line_dict[gff_line_root_list[line_count]]:
-                                        gff_line_status_dict[lc] = REMOVED
-                                else:
-                                    tokens[0] = start_mapping[0][3]
-                                    tokens[3] = str(start - start_mapping[0][1] + start_mapping[0][4])
-                                    tokens[4] = str(end - end_mapping[0][1] + end_mapping[0][4])
-                                    gff_line_status_dict[line_count] = KEEP
-                                    gff_converted_line_dict[line_count] = '\t'.join(tokens)
-                        else:
-                            for lc in gff_root_line_dict[gff_line_root_list[line_count]]:
-                                gff_line_status_dict[lc] = REMOVED
-                    gff_line_list.append(line)
-                    line_count += 1
-            # write output files
-            gff_root, gff_ext = splitext(args.gff_file)
-            gff_out_filename = gff_root + '_ncbi' + gff_ext
-            gff_removed_filename = gff_root + '_removed' + gff_ext
-            gff_extra_Ns_filename = gff_root + '_extra_Ns' + gff_ext
-            with open(gff_extra_Ns_filename, 'wb') as extra_Ns_f:
-                with open(gff_removed_filename, 'wb') as removed_f:
-                    with open(gff_out_filename, 'wb') as out_f:
-                        for lc, line in enumerate(gff_line_list):
-                            if gff_line_status_dict[lc] == KEEP:
-                                out_f.write(gff_converted_line_dict[lc])
-                            elif gff_line_status_dict[lc] == EXTRA_NS:
-                                extra_Ns_f.write(line)
-                            elif gff_line_status_dict[lc] == REMOVED:
-                                removed_f.write(line)
-    else:
-        args = parser.parse_args()
-        gff_updater = GffUpdater(args.alignment_file, args.updated_postfix, args.removed_postfix)
-        for gff_file in args.gff_files:
-            gff_updater.update(gff_file)
+    args = parser.parse_args()
+    gff_updater = GffUpdater(args.alignment_file, args.updated_postfix, args.removed_postfix)
+    for gff_file in args.gff_files:
+        gff_updater.update(gff_file)
 
 
 if __name__ == '__main__':
