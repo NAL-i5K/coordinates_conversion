@@ -12,6 +12,7 @@ import logging
 import sys
 import argparse
 from textwrap import dedent
+from io import BytesIO
 
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)-8s %(message)s')
 
@@ -45,17 +46,20 @@ class BedUpdater(object):
         """
         tsv_format = [str, int, int, str, int, int]
         alignment_list_tsv_file_f = alignment_list_tsv_file
+        
         if isinstance(alignment_list_tsv_file, str):
            logging.info('Reading alignment data from: %s...', alignment_list_tsv_file_f.name)
            alignment_list_tsv_file_f = open(alignment_list_tsv_file, 'rb')
         alignment_list = []
         for line in alignment_list_tsv_file_f:
+            line = str(line,'utf-8')
             alignment_list.append([f(t) for f, t in zip(tsv_format, line.split('\t'))])
         if isinstance(alignment_list_tsv_file, str):
             alignment_list_tsv_file_f.close()
         else:
             logging.info('Reading alignment data from: %s...', alignment_list_tsv_file_f.name)
         logging.info('  Alignments: %d', len(alignment_list))
+        
         return alignment_list
 
 
@@ -70,11 +74,12 @@ class BedUpdater(object):
         removed_file = Bed_root + self.removed_postfix + Bed_ext
         updated_count = 0
         removed_count = 0
-        updated_file_f = open(updated_file, 'wb')
-        removed_file_f = open(removed_file, 'wb')
+        updated_file_f = open(updated_file, 'w')
+        removed_file_f = open(removed_file, 'w')
 
         with open(self.Bed_file, 'rb') as in_f:
             for line in in_f:
+                line=str(line,'utf-8')
                 line_strip = line.strip()
                 tokens = line_strip.split('\t')
                 try:
@@ -88,12 +93,13 @@ class BedUpdater(object):
                 if tokens[0] in self.alignment_dict:
                     start, end = int(tokens[1]), int(tokens[2])
                     mappings = self.alignment_dict[tokens[0]]
-                    start_mapping = filter(lambda m: m[1] <= start and start <= m[2], mappings)
-                    end_mapping = filter(lambda m: m[1] <= end and end <= m[2], mappings)
+                    start_mapping = [m for m in mappings if m[1] <= start and start <= m[2]]
+                    end_mapping = [m for m in mappings if m[1] <= end and end <= m[2]]
+
                     try:
                         thickStart, thickEnd = int(tokens[6]), int(tokens[7])
-                        thickStart_mapping = filter(lambda m: m[1] <= thickStart and thickStart <= m[2], mappings)
-                        thickEnd_mapping = filter(lambda m: m[1] <= thickEnd and thickEnd <= m[2], mappings)
+                        thickStart_mapping = [m for m in mappings if m[1] <= thickStart and thickStart <= m[2]]
+                        thickEnd_mapping = [m for m in mappings if m[1] <= thickEnd and thickEnd <= m[2]]
                         if len(start_mapping) != 1 or len(end_mapping) != 1:
                             removed_count+=1
                             removed_file_f.write(line)
