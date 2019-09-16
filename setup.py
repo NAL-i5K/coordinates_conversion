@@ -2,7 +2,6 @@ from setuptools import setup, find_packages
 
 setup(
     name='coordinates_conversion',
-    version='1.0.1',
     author='NAL i5k workspace',
     author_email='i5k@ars.usda.gov',
     packages=find_packages(),
