@@ -430,7 +430,7 @@ def main():
                 alignment_list_pickle_file = 'alignment_list_pickle'
             pickle.dump(alignment_list, open(alignment_list_pickle_file, 'wb'))
         for alignment in alignment_list:
-            args.out.write(('\t'.join(str(a) for a in alignment) + '\n').encode('ascii'))
+            args.out.write(('\t'.join(str(a) for a in alignment) + '\n').encode('utf-8'))
         args.out.close()
 
 if __name__ == '__main__':
