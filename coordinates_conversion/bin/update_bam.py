@@ -160,7 +160,7 @@ class BamUpdater(object):
                             if read.next_reference_name in self.alignment_dict:
                                 next_mappings = self.alignment_dict[read.next_reference_name]
                                 next_start = int(read.next_reference_start)
-                                start_next_mapping = filter(lambda m: m[1] <= next_start and next_start <= m[2], next_mappings)
+                                start_next_mapping = [m for m in next_mappings if m[1] <= next_start and next_start <= m[2]]
                                 if len(start_next_mapping)!=1:
                                     removed_count+=1
                                     removed_file_f.write(read)
