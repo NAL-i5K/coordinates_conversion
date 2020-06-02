@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.7
+#! /usr/bin/env python3
 
 """
 Compare two very similar FASTA files and output coordinate mappings
@@ -32,7 +32,7 @@ def fasta_file_to_dict(fasta_file, id=True, header=False, seq=False):
 
     fasta_file_f = fasta_file
     if isinstance(fasta_file, str):
-        fasta_file_f = open(fasta_file, 'rb')
+        fasta_file_f = open(fasta_file, 'r',encoding="UTF-8")
     
     fasta_dict = {}
     flags = OrderedDict([('id', id), ('header', header), ('seq', seq)])
@@ -74,7 +74,7 @@ def fasta_dict_to_file(fasta_dict, fasta_file):
     The value of fasta_dict is a python dict with 3 keys: header, id and seq
     """
     if isinstance(fasta_file, str):
-        fasta_file = open(fasta_file, 'wb')
+        fasta_file = open(fasta_file, 'w',encoding="UTF-8")
 
     for key in fasta_dict:
         fasta_file.write(fasta_dict[key]['header'] + '\n' + fasta_dict[key]['seq'] + '\n')
