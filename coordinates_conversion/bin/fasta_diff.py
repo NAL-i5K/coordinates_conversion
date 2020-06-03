@@ -40,7 +40,7 @@ def fasta_file_to_dict(fasta_file, id=True, header=False, seq=False):
     count = 0
     line_num = 0    
     for line in fasta_file_f:
-        line = str(line.strip(), 'utf-8')#python36
+        line = str(line.strip())
         if not line:
             continue
         if line[0] == '>':
