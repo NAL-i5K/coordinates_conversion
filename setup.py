@@ -5,7 +5,7 @@ setup(
     author='NAL i5k workspace',
     author_email='i5k@ars.usda.gov',
     packages=find_packages(),
-    install_requires=['pysam'],
+    install_requires=['pysam == 0.15.1'],
     entry_points={
         'console_scripts': [
             'fasta_diff=coordinates_conversion.bin.fasta_diff:main',

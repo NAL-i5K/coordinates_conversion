@@ -40,7 +40,7 @@ def fasta_file_to_dict(fasta_file, id=True, header=False, seq=False):
     count = 0
     line_num = 0    
     for line in fasta_file_f:
-        line = str(line.strip(), 'utf-8')#python36
+        line = str(line.strip())
         if not line:
             continue
         if line[0] == '>':
@@ -329,8 +329,8 @@ def fasta_diff(old_fasta_file, new_fasta_file, debug=True, header_check=False, r
     for stage in range(len(stages)):
         temp_file_name = ''
         if debug:
-            temp_file_name = old_fasta_file + '_' + new_fasta_file + '_stage_' + str(stage + 1) + '_pickle'
-        if isfile(temp_file_name):
+            temp_file_name = old_fasta_file.split("/")[-1] + '_' + new_fasta_file.split("/")[-1] + '_stage_' + str(stage + 1) + '_pickle'        
+        if isfile(temp_file_name): 
             (alignment_list, old_fasta_dict, new_fasta_dict) = pickle.load(open(temp_file_name, 'rb'))
         else:
             if old_fasta_dict == None and new_fasta_dict == None:
