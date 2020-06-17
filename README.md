@@ -6,7 +6,7 @@ Conversion programs that use the output from fasta_diff to convert reference seq
 
 ## Prerequisite
 
-- Python 3.6
+- Python 3.7
 - samtools (optional, only for SAM/BAM related scripts)
 
 ## Installation
